@@ -103,7 +103,6 @@ public:
     int getLineNumber() const;
     virtual bool willRun() const;
     int getErrorCode() const;
-    virtual const char *getProgressIndicator() const;
     virtual bool hasFailed() const;
     void countCheck();
 
