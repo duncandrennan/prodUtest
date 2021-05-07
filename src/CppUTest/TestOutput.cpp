@@ -105,7 +105,10 @@ void TestOutput::printCurrentTestStarted(const UtestShell& test)
 void TestOutput::printCurrentTestEnded(const TestResult& res)
 {
     if (verbose_) {
-        print(" - ");
+        if (res.getFailureCount() == 0)
+        {
+            print(";PASS;");
+        }
         print(res.getCurrentTestTotalExecutionTime());
         print(" ms\n");
     }
@@ -185,12 +188,16 @@ void TestOutput::printTestRun(int number, int total)
 
 void TestOutput::printFailure(const TestFailure& failure)
 {
+    print(";FAIL;");
+    printFileAndLineForFailure(failure);
+#if 0
     if (failure.isOutsideTestFile() || failure.isInHelperFunction())
         printFileAndLineForTestAndFailure(failure);
     else
         printFileAndLineForFailure(failure);
 
     printFailureMessage(failure.getMessage());
+#endif
 }
 
 void TestOutput::printFileAndLineForTestAndFailure(const TestFailure& failure)
@@ -203,7 +210,9 @@ void TestOutput::printFileAndLineForTestAndFailure(const TestFailure& failure)
 void TestOutput::printFileAndLineForFailure(const TestFailure& failure)
 {
     printErrorInFileOnLineFormattedForWorkingEnvironment(failure.getFileName(), failure.getFailureLineNumber());
+#if 0
     printFailureInTest(failure.getTestName());
+#endif
 }
 
 void TestOutput::printFailureInTest(SimpleString testName)
@@ -230,12 +239,10 @@ void TestOutput::printErrorInFileOnLineFormattedForWorkingEnvironment(SimpleStri
 
 void TestOutput::printEclipseErrorInFileOnLine(SimpleString file, int lineNumber)
 {
-    print("\n");
     print(file.asCharString());
     print(":");
     print(lineNumber);
-    print(":");
-    print(" error:");
+    print(";");
 }
 
 void TestOutput::printVisualStudioErrorInFileOnLine(SimpleString file, int lineNumber)
