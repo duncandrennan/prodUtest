@@ -80,3 +80,7 @@ missing
 test-driver
 platforms/iar/settings
 cpputest_*.xml
+VC.DB*
+.dirstamp
+*.po
+generated/*
