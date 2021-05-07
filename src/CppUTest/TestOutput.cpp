@@ -102,13 +102,18 @@ void TestOutput::printCurrentTestStarted(const UtestShell& test)
     }
 }
 
+void TestOutput::printCurrentTestResult(const UtestShell& test)
+{
+	if (verbose_) {
+        if (!test.hasFailed()) {
+            print(";PASS;");
+        }
+    }
+}
+
 void TestOutput::printCurrentTestEnded(const TestResult& res)
 {
     if (verbose_) {
-        if (res.getFailureCount() == 0)
-        {
-            print(";PASS;");
-        }
         print(res.getCurrentTestTotalExecutionTime());
         print(" ms\n");
     }
@@ -189,6 +194,8 @@ void TestOutput::printTestRun(int number, int total)
 void TestOutput::printFailure(const TestFailure& failure)
 {
     print(";FAIL;");
+    print(failure.getErrorCode());
+    print(";");
     printFileAndLineForFailure(failure);
 #if 0
     if (failure.isOutsideTestFile() || failure.isInHelperFunction())

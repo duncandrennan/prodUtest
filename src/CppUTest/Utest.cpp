@@ -300,6 +300,11 @@ void UtestShell::setLineNumber(int lineNumber)
     lineNumber_ = lineNumber;
 }
 
+void UtestShell::setErrorCode(int errorCode)
+{
+	errorCode_ = errorCode;
+}
+
 void UtestShell::setGroupName(const char* groupName)
 {
     group_ = groupName;
@@ -318,6 +323,11 @@ const SimpleString UtestShell::getFile() const
 int UtestShell::getLineNumber() const
 {
     return lineNumber_;
+}
+
+int UtestShell::getErrorCode() const
+{
+    return errorCode_;
 }
 
 bool UtestShell::match(const char* target, const TestFilter* filters) const

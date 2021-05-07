@@ -338,5 +338,6 @@
 
 #define UT_CRASH() { UtestShell::crash(); }
 #define RUN_ALL_TESTS(ac, av) CommandLineTestRunner::RunAllTests(ac, av)
+#define SET_ERROR_CODE(errorcode) { UtestShell::setErrorCode(errorCode); }
 
 #endif /*D_UTestMacros_h*/

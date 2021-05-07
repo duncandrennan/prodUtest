@@ -64,11 +64,11 @@ void TestResult::print(const char* text)
     output_.print(text);
 }
 
-void TestResult::currentTestEnded(UtestShell* /*test*/)
+void TestResult::currentTestEnded(UtestShell* test)
 {
     currentTestTotalExecutionTime_ = GetPlatformSpecificTimeInMillis() - currentTestTimeStarted_;
+    output_.printCurrentTestResult(*test);
     output_.printCurrentTestEnded(*this);
-
 }
 
 void TestResult::addFailure(const TestFailure& failure)

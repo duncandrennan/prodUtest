@@ -102,6 +102,8 @@ public:
     const SimpleString getFile() const;
     int getLineNumber() const;
     virtual bool willRun() const;
+    int getErrorCode() const;
+    virtual const char *getProgressIndicator() const;
     virtual bool hasFailed() const;
     void countCheck();
 
@@ -132,6 +134,7 @@ public:
     void setLineNumber(int lineNumber);
     void setGroupName(const char *groupName);
     void setTestName(const char *testName);
+    void setErrorCode(int errorCode);
 
     static void crash();
     static void setCrashMethod(void (*crashme)());
@@ -162,6 +165,7 @@ private:
     const char *name_;
     const char *file_;
     int lineNumber_;
+    int errorCode_;
     UtestShell *next_;
     bool isRunAsSeperateProcess_;
     bool hasFailed_;

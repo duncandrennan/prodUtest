@@ -61,22 +61,22 @@ static SimpleString addMarkerToString(const SimpleString& str, int markerPos)
 }
 
 TestFailure::TestFailure(UtestShell* test, const char* fileName, int lineNumber, const SimpleString& theMessage) :
-    testName_(test->getFormattedName()), testNameOnly_(test->getName()), fileName_(fileName), lineNumber_(lineNumber), testFileName_(test->getFile()), testLineNumber_(test->getLineNumber()), message_(theMessage)
+    testName_(test->getFormattedName()),testNameOnly_(test->getName()),  fileName_(fileName), lineNumber_(lineNumber), testFileName_(test->getFile()), testLineNumber_(test->getLineNumber()), message_(theMessage), errorCode_(test->getErrorCode())
 {
 }
 
 TestFailure::TestFailure(UtestShell* test, const SimpleString& theMessage) :
-    testName_(test->getFormattedName()), testNameOnly_(test->getName()), fileName_(test->getFile()), lineNumber_(test->getLineNumber()), testFileName_(test->getFile()), testLineNumber_(test->getLineNumber()), message_(theMessage)
+    testName_(test->getFormattedName()),testNameOnly_(test->getName()),  fileName_(test->getFile()), lineNumber_(test->getLineNumber()), testFileName_(test->getFile()), testLineNumber_(test->getLineNumber()), message_(theMessage), errorCode_(test->getErrorCode())
 {
 }
 
 TestFailure::TestFailure(UtestShell* test, const char* fileName, int lineNum) :
-    testName_(test->getFormattedName()), testNameOnly_(test->getName()), fileName_(fileName), lineNumber_(lineNum), testFileName_(test->getFile()), testLineNumber_(test->getLineNumber()), message_("no message")
+    testName_(test->getFormattedName()),testNameOnly_(test->getName()),  fileName_(fileName), lineNumber_(lineNum), testFileName_(test->getFile()), testLineNumber_(test->getLineNumber()), message_("no message"), errorCode_(test->getErrorCode())
 {
 }
 
 TestFailure::TestFailure(const TestFailure& f) :
-    testName_(f.testName_), testNameOnly_(f.testNameOnly_), fileName_(f.fileName_), lineNumber_(f.lineNumber_), testFileName_(f.testFileName_), testLineNumber_(f.testLineNumber_), message_(f.message_)
+    testName_(f.testName_),testNameOnly_(f.testNameOnly_),  fileName_(f.fileName_), lineNumber_(f.lineNumber_), testFileName_(f.testFileName_), testLineNumber_(f.testLineNumber_), message_(f.message_), errorCode_(f.errorCode_)
 {
 }
 
@@ -118,6 +118,11 @@ int TestFailure::getTestLineNumber() const
 SimpleString TestFailure::getMessage() const
 {
     return message_;
+}
+
+int TestFailure::getErrorCode() const
+{
+	return errorCode_;
 }
 
 bool TestFailure::isOutsideTestFile() const

@@ -59,6 +59,7 @@ public:
     virtual SimpleString getMessage() const;
     virtual SimpleString getTestFileName() const;
     virtual int getTestLineNumber() const;
+    virtual int getErrorCode() const;
     bool isOutsideTestFile() const;
     bool isInHelperFunction() const;
 
@@ -80,6 +81,7 @@ protected:
     SimpleString testFileName_;
     int testLineNumber_;
     SimpleString message_;
+    int errorCode_;
 
     TestFailure& operator=(const TestFailure&);
 
