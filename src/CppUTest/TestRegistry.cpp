@@ -64,6 +64,12 @@ void TestRegistry::runAllTests(TestResult& result)
             result.currentTestEnded(test);
         }
 
+        if (test->hasFailed()) {
+            while (!endOfGroup(test)) {
+                test=test->getNext();
+            }
+        }
+
         if (endOfGroup(test)) {
             groupStart = true;
             result.currentGroupEnded(test);
