@@ -84,3 +84,5 @@ VC.DB*
 .dirstamp
 *.po
 generated/*
+.libs/*
+*.trs
