@@ -2,6 +2,8 @@
 
 prodUtest is a framework for production testing of electronic products
 
+prodUtest is built on top of CppUTest, a C++ unit testing framework
+
 ## Building in Windows
 
 * Install TDM64 (or TDM32) - https://jmeubank.github.io/tdm-gcc/ (last confirmed working build was with TDM64-9.2)
