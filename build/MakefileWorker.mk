@@ -70,6 +70,7 @@
 UNAME_OUTPUT = "$(shell uname -a)"
 MACOSX_STR = Darwin
 MINGW_STR = MINGW
+MSYS_STR = MSYS
 CYGWIN_STR = CYGWIN
 LINUX_STR = Linux
 SUNOS_STR = SunOS
@@ -84,6 +85,10 @@ UNAME_OS = $(UNKNWOWN_OS_STR)
 
 ifeq ($(findstring $(MINGW_STR),$(UNAME_OUTPUT)),$(MINGW_STR))
 	UNAME_OS = $(MINGW_STR)
+endif
+
+ifeq ($(findstring $(MSYS_STR),$(UNAME_OUTPUT)),$(MSYS_STR))
+	UNAME_OS = $(MSYS_STR)
 endif
 
 ifeq ($(findstring $(CYGWIN_STR),$(UNAME_OUTPUT)),$(CYGWIN_STR))
@@ -116,6 +121,11 @@ endif
 
 #Kludge for mingw, it does not have cc.exe, but gcc.exe will do
 ifeq ($(UNAME_OS),$(MINGW_STR))
+	CC := gcc
+endif
+
+#Kludge for mingw, it does not have cc.exe, but gcc.exe will do
+ifeq ($(UNAME_OS),$(MSYS_STR))
 	CC := gcc
 endif
 
