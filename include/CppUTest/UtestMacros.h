@@ -226,6 +226,15 @@
 #define UNSIGNED_LONGLONGS_EQUAL_LOCATION(expected, actual, text, file, line)\
         { UtestShell::getCurrent()->assertUnsignedLongLongsEqual(expected, actual, text, file, line); }
 
+#define LONG_IN_RANGE(minimum, maximum, actual)\
+        LONG_IN_RANGE_LOCATION(minimum, maximum, actual, NULL, __FILE__, __LINE__)
+
+#define LONG_IN_RANGE_TEXT(minimum, maximum, actual, text)\
+        LONG_IN_RANGE_LOCATION(minimum, maximum, actual, text, __FILE__, __LINE__)
+
+#define LONG_IN_RANGE_LOCATION(minimum, maximum, actual, text, file, line)\
+        { UtestShell::getCurrent()->assertLongInRange(minimum, maximum, actual, text, file, line); }
+
 #define BYTES_EQUAL(expected, actual)\
     LONGS_EQUAL((expected) & 0xff,(actual) & 0xff)
 

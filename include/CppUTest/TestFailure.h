@@ -149,6 +149,12 @@ public:
     UnsignedLongLongsEqualFailure(UtestShell* test, const char* fileName, int lineNumber, cpputest_ulonglong expected, cpputest_ulonglong actual, const SimpleString& text);
 };
 
+class LongInRangeFailure : public TestFailure
+{
+public:
+    LongInRangeFailure(UtestShell* test, const char* fileName, int lineNumber, cpputest_longlong minimum, cpputest_longlong maximum, cpputest_longlong actual, const SimpleString& text);
+};
+
 class SignedBytesEqualFailure : public TestFailure
 {
 public:

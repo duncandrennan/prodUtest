@@ -465,6 +465,19 @@ void UtestShell::assertUnsignedLongLongsEqual(cpputest_ulonglong expected, cpput
 #endif
 }
 
+void UtestShell::assertLongInRange(cpputest_longlong minimum, cpputest_longlong maximum, cpputest_longlong actual, const char* text, const char* fileName, int lineNumber, const TestTerminator& testTerminator)
+{
+    getTestResult()->countCheck();
+#ifdef CPPUTEST_USE_LONG_LONG
+    if ((minimum > actual) || (maximum < actual))
+        failWith(LongInRangeFailure(this, fileName, lineNumber, minimum, maximum, actual, text), testTerminator);
+#else
+    (void)expected;
+    (void)actual;
+    failWith(FeatureUnsupportedFailure(this, fileName, lineNumber, "CPPUTEST_USE_LONG_LONG", text), testTerminator);
+#endif
+}
+
 void UtestShell::assertSignedBytesEqual(signed char expected, signed char actual, const char* text, const char *fileName, int lineNumber, const TestTerminator& testTerminator)
 {
     getTestResult()->countCheck();

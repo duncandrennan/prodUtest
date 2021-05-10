@@ -313,6 +313,20 @@ UnsignedLongLongsEqualFailure::UnsignedLongLongsEqualFailure(UtestShell* test, c
     message_ += createButWasString(expectedReported, actualReported);
 }
 
+LongInRangeFailure::LongInRangeFailure(UtestShell* test, const char* fileName, int lineNumber, cpputest_longlong minimum, cpputest_longlong maximum, cpputest_longlong actual, const SimpleString& text)
+: TestFailure(test, fileName, lineNumber)
+{
+    message_ = createUserText(text);
+
+    SimpleString aDecimal = StringFrom(actual);
+    SimpleString eMinimum = StringFrom(minimum);
+    SimpleString eMaximum = StringFrom(maximum);
+
+    SimpleString actualReported = aDecimal;
+    SimpleString expectedReported = eMinimum + " to " + eMaximum;
+    message_ += createButWasString(expectedReported, actualReported);
+}
+
 SignedBytesEqualFailure::SignedBytesEqualFailure (UtestShell* test, const char* fileName, int lineNumber, signed char expected, signed char actual, const SimpleString& text)
 : TestFailure(test, fileName, lineNumber)
 {
