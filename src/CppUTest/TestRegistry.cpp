@@ -46,6 +46,7 @@ void TestRegistry::addTest(UtestShell *test)
 void TestRegistry::runAllTests(TestResult& result)
 {
     bool groupStart = true;
+    bool skip_to_teardown = false;
 
     result.testsStarted();
     for (UtestShell *test = tests_; test != NULL; test = test->getNext()) {
@@ -66,13 +67,27 @@ void TestRegistry::runAllTests(TestResult& result)
 
         if (test->hasFailed()) {
             while (!endOfGroup(test)) {
-                test=test->getNext();
+                test = test->getNext();
             }
+            skip_to_teardown = true;
         }
 
         if (endOfGroup(test)) {
             groupStart = true;
             result.currentGroupEnded(test);
+        }
+
+        if (skip_to_teardown)
+        {
+            SimpleString last_group("testjig_teardown");
+            UtestShell * next_test = test->getNext();
+
+            while(next_test != NULL && !next_test->getGroup().equalsNoCase(last_group))
+            {
+                test = test->getNext();
+                next_test = test->getNext();
+            }
+            skip_to_teardown = false;
         }
     }
     result.testsEnded();
