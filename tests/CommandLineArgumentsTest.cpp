@@ -342,6 +342,14 @@ TEST(CommandLineArguments, setTeamCityOutputDifferentParameter)
     CHECK(args->isTeamCityOutput());
 }
 
+TEST(CommandLineArguments, setProdUTestOutputDifferentParameter)
+{
+    int argc = 3;
+    const char* argv[] = { "tests.exe", "-o", "produtest" };
+    CHECK(newArgumentParser(argc, argv));
+    CHECK(args->isProdUTestOutput());
+}
+
 TEST(CommandLineArguments, setOutputToGarbage)
 {
     int argc = 3;

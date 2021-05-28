@@ -52,6 +52,7 @@ public:
     bool isJUnitOutput() const;
     bool isEclipseOutput() const;
     bool isTeamCityOutput() const;
+    bool isProdUTestOutput() const;
     bool runTestsInSeperateProcess() const;
     const SimpleString& getPackageName() const;
     const char* usage() const;
@@ -60,7 +61,7 @@ private:
 
     enum OutputType
     {
-        OUTPUT_ECLIPSE, OUTPUT_JUNIT, OUTPUT_TEAMCITY
+        OUTPUT_ECLIPSE, OUTPUT_JUNIT, OUTPUT_TEAMCITY, OUTPUT_PRODUTEST
     };
     int ac_;
     const char** av_;

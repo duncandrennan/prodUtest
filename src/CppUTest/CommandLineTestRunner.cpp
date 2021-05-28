@@ -30,6 +30,7 @@
 #include "CppUTest/TestOutput.h"
 #include "CppUTest/JUnitTestOutput.h"
 #include "CppUTest/TeamCityTestOutput.h"
+#include "CppUTest/ProdUTestOutput.h"
 #include "CppUTest/TestRegistry.h"
 
 int CommandLineTestRunner::RunAllTests(int ac, char** av)
@@ -126,6 +127,11 @@ int CommandLineTestRunner::runAllTests()
     return failureCount;
 }
 
+TestOutput* CommandLineTestRunner::createProdUTestOutput()
+{
+    return new ProdUTestOutput;
+}
+
 TestOutput* CommandLineTestRunner::createTeamCityOutput()
 {
     return new TeamCityTestOutput;
@@ -167,6 +173,8 @@ bool CommandLineTestRunner::parseArguments(TestPlugin* plugin)
       output_ = createCompositeOutput(output_, createConsoleOutput());
   } else if (arguments_->isTeamCityOutput()) {
     output_ = createTeamCityOutput();
+  } else if (arguments_->isProdUTestOutput()) {
+    output_ = createProdUTestOutput();
   } else
     output_ = createConsoleOutput();
   return true;

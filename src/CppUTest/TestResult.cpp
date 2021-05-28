@@ -67,7 +67,7 @@ void TestResult::print(const char* text)
 void TestResult::currentTestEnded(UtestShell* test)
 {
     currentTestTotalExecutionTime_ = GetPlatformSpecificTimeInMillis() - currentTestTimeStarted_;
-    output_.printCurrentTestResult(*test);
+    currentTestPassed_ = !test->hasFailed();
     output_.printCurrentTestEnded(*this);
 }
 
@@ -133,5 +133,10 @@ long TestResult::getCurrentTestTotalExecutionTime() const
 long TestResult::getCurrentGroupTotalExecutionTime() const
 {
     return currentGroupTotalExecutionTime_;
+}
+
+bool TestResult::getCurrentTestPassed() const
+{
+    return currentTestPassed_;
 }
 

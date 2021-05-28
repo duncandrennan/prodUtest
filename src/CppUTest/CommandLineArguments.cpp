@@ -252,6 +252,10 @@ bool CommandLineArguments::SetOutputType(int ac, const char** av, int& i)
         outputType_ = OUTPUT_TEAMCITY;
         return true;
     }
+    if (outputType == "produtest") {
+        outputType_ = OUTPUT_PRODUTEST;
+        return true;
+    }
 
     return false;
 }
@@ -269,6 +273,11 @@ bool CommandLineArguments::isJUnitOutput() const
 bool CommandLineArguments::isTeamCityOutput() const
 {
     return outputType_ == OUTPUT_TEAMCITY;
+}
+
+bool CommandLineArguments::isProdUTestOutput() const
+{
+    return outputType_ == OUTPUT_PRODUTEST;
 }
 
 const SimpleString& CommandLineArguments::getPackageName() const

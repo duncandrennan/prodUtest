@@ -90,6 +90,7 @@ public:
 
     long getCurrentTestTotalExecutionTime() const;
     long getCurrentGroupTotalExecutionTime() const;
+    bool getCurrentTestPassed() const;
 private:
 
     TestOutput& output_;
@@ -103,6 +104,7 @@ private:
     long timeStarted_;
     long currentTestTimeStarted_;
     long currentTestTotalExecutionTime_;
+    bool currentTestPassed_;
     long currentGroupTimeStarted_;
     long currentGroupTotalExecutionTime_;
 };

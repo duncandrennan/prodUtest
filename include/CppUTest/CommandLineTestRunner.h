@@ -50,6 +50,7 @@ public:
     int runAllTestsMain();
 
 protected:
+    virtual TestOutput* createProdUTestOutput();
     virtual TestOutput* createTeamCityOutput();
     virtual TestOutput* createJUnitOutput(const SimpleString& packageName);
     virtual TestOutput* createConsoleOutput();

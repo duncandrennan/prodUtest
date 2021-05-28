@@ -52,7 +52,6 @@ public:
     virtual void printTestsStarted();
     virtual void printTestsEnded(const TestResult& result);
     virtual void printCurrentTestStarted(const UtestShell& test);
-    virtual void printCurrentTestResult(const UtestShell& test);
     virtual void printCurrentTestEnded(const TestResult& res);
     virtual void printCurrentGroupStarted(const UtestShell& test);
     virtual void printCurrentGroupEnded(const TestResult& res);
@@ -81,7 +80,7 @@ protected:
 
     virtual void printProgressIndicator();
     void printFileAndLineForTestAndFailure(const TestFailure& failure);
-    void printFileAndLineForFailure(const TestFailure& failure);
+    virtual void printFileAndLineForFailure(const TestFailure& failure);
     void printFailureInTest(SimpleString testName);
     void printFailureMessage(SimpleString reason);
     void printErrorInFileOnLineFormattedForWorkingEnvironment(SimpleString testFile, int lineNumber);

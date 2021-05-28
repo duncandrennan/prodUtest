@@ -86,6 +86,12 @@ public:
     fakeTCOutputWhichIsReallyABuffer = new StringBufferTestOutput;
     return fakeTCOutputWhichIsReallyABuffer;
   }
+
+  TestOutput* createProdUTestOutput()
+  {
+    fakeTCOutputWhichIsReallyABuffer = new StringBufferTestOutput;
+    return fakeTCOutputWhichIsReallyABuffer;
+  }
 };
 
 TEST_GROUP(CommandLineTestRunner)

@@ -41,6 +41,7 @@ lib_libCppUTest_a_SOURCES = \
 	src/CppUTest/SimpleString.cpp \
 	src/CppUTest/SimpleMutex.cpp \
 	src/CppUTest/TeamCityTestOutput.cpp \
+	src/CppUTest/ProdUTestOutput.cpp \
 	src/CppUTest/TestFailure.cpp \
 	src/CppUTest/TestFilter.cpp \
 	src/CppUTest/TestHarness_c.cpp \
@@ -70,6 +71,7 @@ include_cpputest_HEADERS = \
 	include/CppUTest/SimpleMutex.h \
 	include/CppUTest/StandardCLibrary.h \
 	include/CppUTest/TeamCityTestOutput.h \
+	include/CppUTest/ProdUTestOutput.h \
 	include/CppUTest/TestFailure.h \
 	include/CppUTest/TestFilter.h \
 	include/CppUTest/TestHarness.h \
