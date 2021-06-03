@@ -118,6 +118,22 @@ TEST(CommandLineArguments, runningTestsInSeperateProcesses)
     CHECK(args->runTestsInSeperateProcess());
 }
 
+TEST(CommandLineArguments, setTestDefine)
+{
+    int argc = 3;
+    const char* argv[] = { "tests.exe", "-D", "foo=bar" };
+    CHECK(newArgumentParser(argc, argv));
+    CHECK_EQUAL(TestDefine("foo=bar"), *args->getTestDefines());
+}
+
+TEST(CommandLineArguments, setTestDefineSameParameter)
+{
+    int argc = 2;
+    const char* argv[] = { "tests.exe", "-Dfoo=bar" };
+    CHECK(newArgumentParser(argc, argv));
+    CHECK_EQUAL(TestDefine("foo=bar"), *args->getTestDefines());
+}
+
 TEST(CommandLineArguments, setGroupFilter)
 {
     int argc = 3;
@@ -378,7 +394,7 @@ TEST(CommandLineArguments, weirdParamatersPrintsUsageAndReturnsFalse)
     int argc = 2;
     const char* argv[] = { "tests.exe", "-SomethingWeird" };
     CHECK(!newArgumentParser(argc, argv));
-    STRCMP_EQUAL("usage [-v] [-c] [-p] [-lg] [-ln] [-ri] [-r#] [-g|sg|xg|xsg groupName]... [-n|sn|xn|xsn testName]... [\"TEST(groupName, testName)\"]... [-o{normal, junit, teamcity}] [-k packageName]\n",
+    STRCMP_EQUAL("usage [-v] [-c] [-p] [-lg] [-ln] [-ri] [-r#] [-D key=value] [-g|sg|xg|xsg groupName]... [-n|sn|xn|xsn testName]... [\"TEST(groupName, testName)\"]... [-o{normal, junit, teamcity}] [-k packageName]\n",
             args->usage());
 }
 

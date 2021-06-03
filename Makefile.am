@@ -43,6 +43,7 @@ lib_libCppUTest_a_SOURCES = \
 	src/CppUTest/TeamCityTestOutput.cpp \
 	src/CppUTest/ProdUTestOutput.cpp \
 	src/CppUTest/TestFailure.cpp \
+	src/CppUTest/TestDefine.cpp \
 	src/CppUTest/TestFilter.cpp \
 	src/CppUTest/TestHarness_c.cpp \
 	src/CppUTest/TestMemoryAllocator.cpp \
@@ -73,6 +74,7 @@ include_cpputest_HEADERS = \
 	include/CppUTest/TeamCityTestOutput.h \
 	include/CppUTest/ProdUTestOutput.h \
 	include/CppUTest/TestFailure.h \
+	include/CppUTest/TestDefine.h \
 	include/CppUTest/TestFilter.h \
 	include/CppUTest/TestHarness.h \
 	include/CppUTest/TestHarness_c.h \
@@ -158,6 +160,7 @@ CppUTestTests_SOURCES = \
 	tests/TeamCityOutputTest.cpp \
 	tests/TestFailureNaNTest.cpp \
 	tests/TestFailureTest.cpp \
+	tests/TestDefineTest.cpp \
 	tests/TestFilterTest.cpp \
 	tests/TestHarness_cTest.cpp \
 	tests/TestHarness_cTestCFile.c \

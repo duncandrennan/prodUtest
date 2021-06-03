@@ -63,10 +63,12 @@ public:
   StringBufferTestOutput* fakeJUnitOutputWhichIsReallyABuffer_;
   StringBufferTestOutput* fakeConsoleOutputWhichIsReallyABuffer;
   StringBufferTestOutput* fakeTCOutputWhichIsReallyABuffer;
+  StringBufferTestOutput* fakeProdUOutputWhichIsReallyABuffer;
 
   CommandLineTestRunnerWithStringBufferOutput(int argc, const char** argv, TestRegistry* registry)
     : CommandLineTestRunner(argc, argv, registry), fakeJUnitOutputWhichIsReallyABuffer_(NULL),
-    fakeConsoleOutputWhichIsReallyABuffer(NULL), fakeTCOutputWhichIsReallyABuffer(NULL)
+    fakeConsoleOutputWhichIsReallyABuffer(NULL), fakeTCOutputWhichIsReallyABuffer(NULL),
+    fakeProdUOutputWhichIsReallyABuffer(NULL)
   {}
 
   TestOutput* createConsoleOutput()
@@ -89,8 +91,8 @@ public:
 
   TestOutput* createProdUTestOutput()
   {
-    fakeTCOutputWhichIsReallyABuffer = new StringBufferTestOutput;
-    return fakeTCOutputWhichIsReallyABuffer;
+    fakeProdUOutputWhichIsReallyABuffer = new StringBufferTestOutput;
+    return fakeProdUOutputWhichIsReallyABuffer;
   }
 };
 
@@ -163,6 +165,15 @@ TEST(CommandLineTestRunner, JunitOutputAndVerboseEnabled)
     commandLineTestRunner.runAllTestsMain();
     STRCMP_CONTAINS("TEST(group, test)", commandLineTestRunner.fakeJUnitOutputWhichIsReallyABuffer_->getOutput().asCharString());
     STRCMP_CONTAINS("TEST(group, test)", commandLineTestRunner.fakeConsoleOutputWhichIsReallyABuffer->getOutput().asCharString());
+}
+
+TEST(CommandLineTestRunner, ProdUTestOutputEnabled)
+{
+    const char* argv[] = { "tests.exe", "-oprodutest"};
+
+    CommandLineTestRunnerWithStringBufferOutput commandLineTestRunner(2, argv, &registry);
+    commandLineTestRunner.runAllTestsMain();
+    CHECK(commandLineTestRunner.fakeProdUOutputWhichIsReallyABuffer);
 }
 
 TEST(CommandLineTestRunner, listTestGroupNamesShouldWorkProperly)

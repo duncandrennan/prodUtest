@@ -31,6 +31,7 @@
 #include "SimpleString.h"
 #include "TestOutput.h"
 #include "TestFilter.h"
+#include "TestDefine.h"
 
 class TestPlugin;
 
@@ -47,6 +48,7 @@ public:
     bool isListingTestGroupAndCaseNames() const;
     bool isRunIgnored() const;
     int getRepeatCount() const;
+    const TestDefine* getTestDefines() const;
     const TestFilter* getGroupFilters() const;
     const TestFilter* getNameFilters() const;
     bool isJUnitOutput() const;
@@ -73,6 +75,7 @@ private:
     bool listTestGroupAndCaseNames_;
     bool runIgnored_;
     int repeat_;
+    TestDefine* testDefines_;
     TestFilter* groupFilters_;
     TestFilter* nameFilters_;
     OutputType outputType_;
@@ -80,6 +83,7 @@ private:
 
     SimpleString getParameterField(int ac, const char** av, int& i, const SimpleString& parameterName);
     void SetRepeatCount(int ac, const char** av, int& index);
+    void AddDefine(int ac, const char** av, int& index);
     void AddGroupFilter(int ac, const char** av, int& index);
     void AddStrictGroupFilter(int ac, const char** av, int& index);
     void AddExcludeGroupFilter(int ac, const char** av, int& index);

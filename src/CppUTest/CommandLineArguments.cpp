@@ -30,12 +30,17 @@
 #include "CppUTest/PlatformSpecificFunctions.h"
 
 CommandLineArguments::CommandLineArguments(int ac, const char** av) :
-    ac_(ac), av_(av), verbose_(false), color_(false), runTestsAsSeperateProcess_(false), listTestGroupNames_(false), listTestGroupAndCaseNames_(false), runIgnored_(false), repeat_(1), groupFilters_(NULL), nameFilters_(NULL), outputType_(OUTPUT_ECLIPSE)
+    ac_(ac), av_(av), verbose_(false), color_(false), runTestsAsSeperateProcess_(false), listTestGroupNames_(false), listTestGroupAndCaseNames_(false), runIgnored_(false), repeat_(1), testDefines_(NULL), groupFilters_(NULL), nameFilters_(NULL), outputType_(OUTPUT_ECLIPSE)
 {
 }
 
 CommandLineArguments::~CommandLineArguments()
 {
+    while(testDefines_) {
+        TestDefine* current = testDefines_;
+        testDefines_ = testDefines_->getNext();
+        delete current;
+    }
     while(groupFilters_) {
         TestFilter* current = groupFilters_;
         groupFilters_ = groupFilters_->getNext();
@@ -61,6 +66,7 @@ bool CommandLineArguments::parse(TestPlugin* plugin)
         else if (argument == "-ln") listTestGroupAndCaseNames_ = true;
         else if (argument == "-ri") runIgnored_ = true;
         else if (argument.startsWith("-r")) SetRepeatCount(ac_, av_, i);
+        else if (argument.startsWith("-D")) AddDefine(ac_, av_, i);
         else if (argument.startsWith("-g")) AddGroupFilter(ac_, av_, i);
         else if (argument.startsWith("-sg")) AddStrictGroupFilter(ac_, av_, i);
         else if (argument.startsWith("-xg")) AddExcludeGroupFilter(ac_, av_, i);
@@ -85,7 +91,7 @@ bool CommandLineArguments::parse(TestPlugin* plugin)
 
 const char* CommandLineArguments::usage() const
 {
-    return "usage [-v] [-c] [-p] [-lg] [-ln] [-ri] [-r#] [-g|sg|xg|xsg groupName]... [-n|sn|xn|xsn testName]... [\"TEST(groupName, testName)\"]... [-o{normal, junit, teamcity}] [-k packageName]\n";
+    return "usage [-v] [-c] [-p] [-lg] [-ln] [-ri] [-r#] [-D key=value] [-g|sg|xg|xsg groupName]... [-n|sn|xn|xsn testName]... [\"TEST(groupName, testName)\"]... [-o{normal, junit, teamcity}] [-k packageName]\n";
 }
 
 bool CommandLineArguments::isVerbose() const
@@ -124,6 +130,11 @@ int CommandLineArguments::getRepeatCount() const
     return repeat_;
 }
 
+const TestDefine* CommandLineArguments::getTestDefines() const
+{
+    return testDefines_;
+}
+
 const TestFilter* CommandLineArguments::getGroupFilters() const
 {
     return groupFilters_;
@@ -156,6 +167,12 @@ SimpleString CommandLineArguments::getParameterField(int ac, const char** av, in
     if (parameter.size() >  parameterLength) return av[i] + parameterLength;
     else if (i + 1 < ac) return av[++i];
     return "";
+}
+
+void CommandLineArguments::AddDefine(int ac, const char** av, int& i)
+{
+    TestDefine* testDefine = new TestDefine(getParameterField(ac, av, i, "-D"));
+    testDefines_ = testDefine->add(testDefines_);
 }
 
 void CommandLineArguments::AddGroupFilter(int ac, const char** av, int& i)
