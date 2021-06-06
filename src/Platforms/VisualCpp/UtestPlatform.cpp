@@ -23,10 +23,12 @@
     #define FOPEN(fp, filename, flag) fopen_s((fp), (filename), (flag))
     #define _VSNPRINTF(str, size, trunc, format, args) _vsnprintf_s((str), (size), (trunc), (format), (args))
     #define LOCALTIME(_tm, timer) localtime_s((_tm), (timer))
+    #define GMTIME(_tm, timer) gmtime_s((_tm), (timer))
 #else
     #define FOPEN(fp, filename, flag) *(fp) = fopen((filename), (flag))
     #define _VSNPRINTF(str, size, trunc, format, args) _vsnprintf((str), (size), (format), (args))
     #define LOCALTIME(_tm, timer) memcpy(_tm, localtime(timer), sizeof(tm));
+    #define GMTIME(_tm, timer) memcpy(_tm, gmtime(timer), sizeof(tm));
 #endif
 
 static jmp_buf test_exit_jmp_buf[10];
@@ -93,6 +95,18 @@ static const char* VisualCppTimeString()
 }
 
 const char* (*GetPlatformSpecificTimeString)() = VisualCppTimeString;
+
+static const char* VisualCppUTCTimeString()
+{
+    time_t the_time = time(NULL);
+    struct tm the_gm_time;
+    static char dateTime[80];
+    GMTIME(&the_gm_time, &the_time);
+    strftime(dateTime, 80, "%Y-%m-%dT%H:%M:%S", &the_gm_time);
+    return dateTime;
+}
+
+const char* (*GetPlatformSpecificUTCTimeString)() = VisualCppUTCTimeString;
 
 ////// taken from gcc
 

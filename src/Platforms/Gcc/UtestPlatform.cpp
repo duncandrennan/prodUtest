@@ -189,8 +189,18 @@ static const char* TimeStringImplementation()
     return dateTime;
 }
 
+static const char* UTCTimeStringImplementation()
+{
+    time_t tm = time(NULL);
+    static char dateTime[80];
+    struct tm *tmp = gmtime(&tm);
+    strftime(dateTime, 80, "%Y-%m-%dT%H:%M:%SZ", tmp);
+    return dateTime;
+}
+
 long (*GetPlatformSpecificTimeInMillis)() = TimeInMillisImplementation;
 const char* (*GetPlatformSpecificTimeString)() = TimeStringImplementation;
+const char* (*GetPlatformSpecificUTCTimeString)() = UTCTimeStringImplementation;
 
 /* Wish we could add an attribute to the format for discovering mis-use... but the __attribute__(format) seems to not work on va_list */
 #ifdef __clang__

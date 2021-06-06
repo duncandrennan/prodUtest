@@ -86,7 +86,14 @@ static SimpleString TimeStringImplementation() {
     return ctime(&tm);
 }
 
+static SimpleString UTCTimeStringImplementation()
+{
+    time_t tm = time(NULL);
+    return asctime(gmtime(&tm));
+}
+
 SimpleString GetPlatformSpecificTimeString() = TimeStringImplementation;
+SimpleString GetPlatformSpecificUTCTimeString() = UTCTimeStringImplementation;
 
 int PlatformSpecificVSNprintf(char* str, size_t size, const char* format, va_list args) {
     return vsnprintf(str, size, format, args);

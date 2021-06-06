@@ -48,6 +48,7 @@ void (*PlatformSpecificRestoreJumpBuffer)() = NULL;
 
 long (*GetPlatformSpecificTimeInMillis)() = NULL;
 const char* (*GetPlatformSpecificTimeString)() = NULL;
+const char* (*GetPlatformSpecificUTCTimeString)() = NULL;
 
 /* IO operations */
 PlatformSpecificFile (*PlatformSpecificFOpen)(const char* filename, const char* flag) = NULL;

@@ -113,12 +113,19 @@ static const char* DosTimeString()
     return ctime(&tm);
 }
 
+static const char* DosUTCTimeString()
+{
+    time_t tm = time(NULL);
+    return asctime(gmtime(&tm));
+}
+
 static int DosVSNprintf(char* str, size_t size, const char* format, va_list args) {
     return vsnprintf(str, size, format, args);
 }
 
 long (*GetPlatformSpecificTimeInMillis)() = DosTimeInMillis;
 const char* (*GetPlatformSpecificTimeString)() = DosTimeString;
+const char* (*GetPlatformSpecificUTCTimeString)() = DosUTCTimeString;
 int (*PlatformSpecificVSNprintf)(char *, size_t, const char*, va_list) = DosVSNprintf;
 
 PlatformSpecificFile DosFOpen(const char* filename, const char* flag)

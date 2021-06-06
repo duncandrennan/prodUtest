@@ -121,6 +121,7 @@ static const char* DummyTimeStringImplementation()
 
 long (*GetPlatformSpecificTimeInMillis)() = TimeInMillisImplementation;
 const char* (*GetPlatformSpecificTimeString)() = DummyTimeStringImplementation;
+const char* (*GetPlatformSpecificUTCTimeString)() = DummyTimeStringImplementation;
 
 int (*PlatformSpecificVSNprintf)(char *str, size_t size, const char* format, va_list args) = vsnprintf;
 

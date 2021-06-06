@@ -125,6 +125,14 @@ extern "C"
 
     const char* (*GetPlatformSpecificTimeString)() = TimeStringImplementation;
 
+    static const char* UTCTimeStringImplementation()
+    {
+        time_t tm = time(NULL);
+        return asctime(gmtime(&tm));
+    }
+
+    const char* (*GetPlatformSpecificUTCTimeString)() = UTCTimeStringImplementation;
+
     int PlatformSpecificAtoI(const char* str)
     {
         return atoi(str);

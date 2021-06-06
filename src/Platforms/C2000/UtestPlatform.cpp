@@ -121,8 +121,15 @@ static const char* TimeStringImplementation()
     return ctime(&tm);
 }
 
+static const char* UTCTimeStringImplementation()
+{
+    time_t tm = time(NULL);
+    return asctime(gmtime(&tm));
+}
+
 long (*GetPlatformSpecificTimeInMillis)() = C2000TimeInMillis;
 const char* (*GetPlatformSpecificTimeString)() = TimeStringImplementation;
+const char* (*GetPlatformSpecificUTCTimeString)() = UTCTimeStringImplementation;
 
 extern int vsnprintf(char*, size_t, const char*, va_list); // not std::vsnprintf()
 
