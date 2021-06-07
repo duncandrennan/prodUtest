@@ -87,6 +87,7 @@ int CommandLineTestRunner::runAllTestsMain()
 
 void CommandLineTestRunner::initializeTestRun()
 {
+    registry_->setTestDefines(arguments_->getTestDefines());
     registry_->setGroupFilters(arguments_->getGroupFilters());
     registry_->setNameFilters(arguments_->getNameFilters());
 	

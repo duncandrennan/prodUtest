@@ -37,6 +37,7 @@ class TestResult;
 class TestPlugin;
 class TestFailure;
 class TestFilter;
+class TestDefine;
 class TestTerminator;
 
 extern bool doubles_equal(double d1, double d2, double threshold);
@@ -96,6 +97,7 @@ public:
     virtual int countTests();
 
     bool shouldRun(const TestFilter* groupFilters, const TestFilter* nameFilters) const;
+    const char * getDefine(const char * name) const;
     const SimpleString getName() const;
     const SimpleString getGroup() const;
     virtual SimpleString getFormattedName() const;
@@ -136,6 +138,7 @@ public:
     void setGroupName(const char *groupName);
     void setTestName(const char *testName);
     void setErrorCode(int errorCode);
+    void setTestDefines(const TestDefine* defines);
 
     static void crash();
     static void setCrashMethod(void (*crashme)());
@@ -162,6 +165,7 @@ protected:
     virtual SimpleString getMacroName() const;
     TestResult *getTestResult();
 private:
+    const TestDefine* testDefine_;
     const char *group_;
     const char *name_;
     const char *file_;

@@ -35,6 +35,7 @@
 
 #include "SimpleString.h"
 #include "TestFilter.h"
+#include "TestDefine.h"
 
 class UtestShell;
 class TestResult;
@@ -52,6 +53,7 @@ public:
     virtual void runAllTests(TestResult& result);
     virtual void listTestGroupNames(TestResult& result);
     virtual void listTestGroupAndCaseNames(TestResult& result);
+    virtual void setTestDefines(const TestDefine* defines);
     virtual void setNameFilters(const TestFilter* filters);
     virtual void setGroupFilters(const TestFilter* filters);
     virtual void installPlugin(TestPlugin* plugin);
@@ -79,6 +81,7 @@ private:
     bool endOfGroup(UtestShell* test);
 
     UtestShell * tests_;
+    const TestDefine* testDefines_;
     const TestFilter* nameFilters_;
     const TestFilter* groupFilters_;
     TestPlugin* firstPlugin_;

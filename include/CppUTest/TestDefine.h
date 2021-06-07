@@ -38,8 +38,9 @@ public:
     TestDefine(const char* testDefine);
     TestDefine(const SimpleString& testDefine);
 
-    TestDefine* add(TestDefine* parameter);
+    TestDefine* add(TestDefine* testDefine);
     TestDefine* getNext() const;
+    const SimpleString& getValue() const;
 
     bool match(const SimpleString& name) const;
 

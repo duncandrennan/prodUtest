@@ -237,6 +237,25 @@ SimpleString UtestShell::getMacroName() const
     return "TEST";
 }
 
+const char * UtestShell::getDefine(const char * name) const
+{
+    const TestDefine* define = testDefine_;
+
+    while ((define != NULL) && (!define->match(StringFrom(name))))
+    {
+        define = define->getNext();
+    }
+
+    if (define != NULL)
+    {
+        return define->getValue().asCharString();
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
 const SimpleString UtestShell::getName() const
 {
     return SimpleString(name_);
@@ -303,6 +322,11 @@ void UtestShell::setLineNumber(int lineNumber)
 void UtestShell::setErrorCode(int errorCode)
 {
 	errorCode_ = errorCode;
+}
+
+void UtestShell::setTestDefines(const TestDefine* defines)
+{
+    testDefine_ = defines;
 }
 
 void UtestShell::setGroupName(const char* groupName)

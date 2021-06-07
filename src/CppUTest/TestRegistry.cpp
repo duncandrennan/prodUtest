@@ -29,7 +29,7 @@
 #include "CppUTest/TestRegistry.h"
 
 TestRegistry::TestRegistry() :
-    tests_(NULL), nameFilters_(NULL), groupFilters_(NULL), firstPlugin_(NullTestPlugin::instance()), runInSeperateProcess_(false), currentRepetition_(0), runIgnored_(false)
+    tests_(NULL), testDefines_(NULL), nameFilters_(NULL), groupFilters_(NULL), firstPlugin_(NullTestPlugin::instance()), runInSeperateProcess_(false), currentRepetition_(0), runIgnored_(false)
 
 {
 }
@@ -59,6 +59,7 @@ void TestRegistry::runAllTests(TestResult& result)
         }
 
         result.countTest();
+        test->setTestDefines(testDefines_);
         if (testShouldRun(test, result)) {
             result.currentTestStarted(test);
             test->runOneTest(firstPlugin_, result);
@@ -171,6 +172,11 @@ void TestRegistry::unDoLastAddTest()
 {
     tests_ = tests_ ? tests_->getNext() : NULL;
 
+}
+
+void TestRegistry::setTestDefines(const TestDefine* defines)
+{
+    testDefines_ = defines;
 }
 
 void TestRegistry::setNameFilters(const TestFilter* filters)

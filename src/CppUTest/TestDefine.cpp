@@ -42,15 +42,20 @@ TestDefine::TestDefine(const char* testDefine) : name_(""), value_(""), next_(NU
     keyValue(SimpleString(testDefine));
 }
 
-TestDefine* TestDefine::add(TestDefine* parameter)
+TestDefine* TestDefine::add(TestDefine* testDefine)
 {
-    next_ = parameter;
+    next_ = testDefine;
     return this;
 }
 
 TestDefine* TestDefine::getNext() const
 {
     return next_;
+}
+
+const SimpleString& TestDefine::getValue() const
+{
+    return value_;
 }
 
 bool TestDefine::match(const SimpleString& name) const
