@@ -375,6 +375,16 @@ void UtestShell::fail(const char *text, const char* fileName, int lineNumber, co
     failWith(FailFailure(this, fileName, lineNumber, text), testTerminator);
 } // LCOV_EXCL_LINE
 
+void UtestShell::assertCstrlenEqual(long expected, const char* actual, const char* text, const char* fileName, int lineNumber, const TestTerminator& testTerminator)
+{
+    getTestResult()->countCheck();
+    getTestResult()->addExpected(StringFrom(expected), StringFrom(""));
+    getTestResult()->addResult(StringFrom(actual));
+    long length = (long)SimpleString::StrLen(actual);
+    if (expected != length)
+        failWith(LongsEqualFailure (this, fileName, lineNumber, expected, length, text), testTerminator);
+}
+
 void UtestShell::assertCstrEqual(const char* expected, const char* actual, const char* text, const char* fileName, int lineNumber, const TestTerminator& testTerminator)
 {
     getTestResult()->countCheck();

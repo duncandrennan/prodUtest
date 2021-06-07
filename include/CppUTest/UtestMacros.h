@@ -142,6 +142,15 @@
     UtestShell::getCurrent()->assertLongsEqual((long)0, (long)0, NULL, file, line); \
   } }
 
+#define STRLEN_EQUAL(expected, actual)\
+  STRLEN_EQUAL_LOCATION(expected, actual, NULL, __FILE__, __LINE__)
+
+#define STRLEN_EQUAL_TEXT(expected, actual, text)\
+  STRLEN_EQUAL_LOCATION(expected, actual, text, __FILE__, __LINE__)
+
+#define STRLEN_EQUAL_LOCATION(expected, actual, text, file, line)\
+  { UtestShell::getCurrent()->assertCstrlenEqual(expected, actual, text, file, line); }
+
 //This check checks for char* string equality using strcmp.
 //This makes up for the fact that CHECK_EQUAL only compares the pointers to char*'s
 #define STRCMP_EQUAL(expected, actual)\
