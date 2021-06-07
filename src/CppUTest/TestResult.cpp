@@ -33,7 +33,7 @@
 
 TestResult::TestResult(TestOutput& p) :
     output_(p), testCount_(0), runCount_(0), checkCount_(0), failureCount_(0), filteredOutCount_(0), ignoredCount_(0), totalExecutionTime_(0), timeStarted_(0), currentTestTimeStarted_(0),
-            currentTestTotalExecutionTime_(0), currentGroupTimeStarted_(0), currentGroupTotalExecutionTime_(0)
+            currentTestTotalExecutionTime_(0), currentGroupTimeStarted_(0), currentGroupTotalExecutionTime_(0), result_(""), expected_(""), expected_max_("")
 {
 }
 
@@ -69,12 +69,26 @@ void TestResult::currentTestEnded(UtestShell* test)
     currentTestTotalExecutionTime_ = GetPlatformSpecificTimeInMillis() - currentTestTimeStarted_;
     currentTestPassed_ = !test->hasFailed();
     output_.printCurrentTestEnded(*this);
+    result_ = "";
+    expected_ = "";
+    expected_max_ = "";
 }
 
 void TestResult::addFailure(const TestFailure& failure)
 {
     output_.printFailure(failure);
     failureCount_++;
+}
+
+void TestResult::addExpected(const SimpleString& expected, const SimpleString& expected_max)
+{
+    expected_ = expected;
+    expected_max_ = expected_max;
+}
+
+void TestResult::addResult(const SimpleString& result)
+{
+    result_ += result;
 }
 
 void TestResult::countTest()
@@ -113,6 +127,21 @@ void TestResult::testsEnded()
     long timeEnded = GetPlatformSpecificTimeInMillis();
     totalExecutionTime_ = timeEnded - timeStarted_;
     output_.printTestsEnded(*this);
+}
+
+const char * TestResult::getExpected() const
+{
+    return expected_.asCharString();
+}
+
+const char * TestResult::getExpectedMax() const
+{
+    return expected_max_.asCharString();
+}
+
+const char * TestResult::getResult() const
+{
+    return result_.asCharString();
 }
 
 long TestResult::getTotalExecutionTime() const

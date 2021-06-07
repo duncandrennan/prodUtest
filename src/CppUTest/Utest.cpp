@@ -388,6 +388,8 @@ void UtestShell::assertCstrEqual(const char* expected, const char* actual, const
 void UtestShell::assertCstrNEqual(const char* expected, const char* actual, size_t length, const char* text, const char* fileName, int lineNumber, const TestTerminator& testTerminator)
 {
     getTestResult()->countCheck();
+    getTestResult()->addExpected(StringFrom(expected), StringFrom(""));
+    getTestResult()->addResult(StringFrom(actual));
     if (actual == 0 && expected == 0) return;
     if (actual == 0 || expected == 0)
         failWith(StringEqualFailure(this, fileName, lineNumber, expected, actual, text), testTerminator);
@@ -428,6 +430,8 @@ void UtestShell::assertCstrNoCaseContains(const char* expected, const char* actu
 void UtestShell::assertLongsEqual(long expected, long actual, const char* text, const char* fileName, int lineNumber, const TestTerminator& testTerminator)
 {
     getTestResult()->countCheck();
+    getTestResult()->addExpected(StringFrom(expected), StringFrom(""));
+    getTestResult()->addResult(StringFrom(actual));
     if (expected != actual)
         failWith(LongsEqualFailure (this, fileName, lineNumber, expected, actual, text), testTerminator);
 }
@@ -468,6 +472,8 @@ void UtestShell::assertUnsignedLongLongsEqual(cpputest_ulonglong expected, cpput
 void UtestShell::assertLongInRange(cpputest_longlong minimum, cpputest_longlong maximum, cpputest_longlong actual, const char* text, const char* fileName, int lineNumber, const TestTerminator& testTerminator)
 {
     getTestResult()->countCheck();
+    getTestResult()->addExpected(StringFrom(minimum), StringFrom(maximum));
+    getTestResult()->addResult(StringFrom(actual));
 #ifdef CPPUTEST_USE_LONG_LONG
     if ((minimum > actual) || (maximum < actual))
         failWith(LongInRangeFailure(this, fileName, lineNumber, minimum, maximum, actual, text), testTerminator);

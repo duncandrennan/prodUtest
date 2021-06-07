@@ -34,6 +34,7 @@
 #ifndef D_TestResult_h
 #define D_TestResult_h
 
+class SimpleString;
 class TestFailure;
 class TestOutput;
 class UtestShell;
@@ -60,6 +61,9 @@ public:
     virtual void addFailure(const TestFailure& failure);
     virtual void print(const char* text);
 
+    virtual void addExpected(const SimpleString& expected, const SimpleString& expected_max);
+    virtual void addResult(const SimpleString& result);
+
     int getTestCount() const
     {
         return testCount_;
@@ -85,12 +89,17 @@ public:
         return failureCount_;
     }
 
+    const char * getExpected() const;
+    const char * getExpectedMax() const;
+    const char * getResult() const;
+
     long getTotalExecutionTime() const;
     void setTotalExecutionTime(long exTime);
 
     long getCurrentTestTotalExecutionTime() const;
     long getCurrentGroupTotalExecutionTime() const;
     bool getCurrentTestPassed() const;
+
 private:
 
     TestOutput& output_;
@@ -107,6 +116,9 @@ private:
     bool currentTestPassed_;
     long currentGroupTimeStarted_;
     long currentGroupTotalExecutionTime_;
+    SimpleString result_;
+    SimpleString expected_;
+    SimpleString expected_max_;
 };
 
 #endif
