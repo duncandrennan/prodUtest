@@ -546,6 +546,15 @@ void UtestShell::assertDoublesEqual(double expected, double actual, double thres
         failWith(DoublesEqualFailure(this, fileName, lineNumber, expected, actual, threshold, text), testTerminator);
 }
 
+void UtestShell::assertDoubleInRange(double minimum, double maximum, double actual, const char* text, const char* fileName, int lineNumber, const TestTerminator& testTerminator)
+{
+    getTestResult()->countCheck();
+    getTestResult()->addExpected(StringFrom(minimum), StringFrom(maximum));
+    getTestResult()->addResult(StringFrom(actual));
+    if ((minimum > actual) || (maximum < actual))
+        failWith(DoubleInRangeFailure(this, fileName, lineNumber, minimum, maximum, actual, text), testTerminator);
+}
+
 void UtestShell::assertBinaryEqual(const void *expected, const void *actual, size_t length, const char* text, const char *fileName, int lineNumber, const TestTerminator& testTerminator)
 {
     getTestResult()->countCheck();

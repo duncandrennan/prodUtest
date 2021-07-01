@@ -290,6 +290,15 @@
 #define DOUBLES_EQUAL_LOCATION(expected, actual, threshold, text, file, line)\
   { UtestShell::getCurrent()->assertDoublesEqual(expected, actual, threshold, text, file, line); }
 
+#define DOUBLE_IN_RANGE(minimum, maximum, actual)\
+  DOUBLE_IN_RANGE_LOCATION(minimum, maximum, actual, NULL, __FILE__, __LINE__)
+
+#define DOUBLE_IN_RANGE_TEXT(minimum, maximum, actual, text)\
+  DOUBLE_IN_RANGE_LOCATION(minimum, maximum, actual, text, __FILE__, __LINE__)
+
+#define DOUBLE_IN_RANGE_LOCATION(minimum, maximum, actual, text, file, line)\
+  { UtestShell::getCurrent()->assertDoubleInRange(minimum, maximum, actual, text, file, line); }
+
 #define MEMCMP_EQUAL(expected, actual, size)\
   MEMCMP_EQUAL_LOCATION(expected, actual, size, NULL, __FILE__, __LINE__)
 

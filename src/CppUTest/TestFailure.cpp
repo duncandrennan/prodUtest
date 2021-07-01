@@ -204,6 +204,20 @@ DoublesEqualFailure::DoublesEqualFailure(UtestShell* test, const char* fileName,
         message_ += "\n\tCannot make comparisons with Nan";
 }
 
+DoubleInRangeFailure::DoubleInRangeFailure(UtestShell* test, const char* fileName, int lineNumber, double minimum, double maximum, double actual, const SimpleString& text)
+: TestFailure(test, fileName, lineNumber)
+{
+    message_ = createUserText(text);
+
+    SimpleString aDecimal = StringFrom(actual);
+    SimpleString eMinimum = StringFrom(minimum);
+    SimpleString eMaximum = StringFrom(maximum);
+
+    SimpleString actualReported = aDecimal;
+    SimpleString expectedReported = eMinimum + " to " + eMaximum;
+    message_ += createButWasString(expectedReported, actualReported);
+}
+
 CheckEqualFailure::CheckEqualFailure(UtestShell* test, const char* fileName, int lineNumber, const SimpleString& expected, const SimpleString& actual, const SimpleString& text)
 : TestFailure(test, fileName, lineNumber)
 {

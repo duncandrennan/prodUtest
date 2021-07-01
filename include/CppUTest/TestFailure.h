@@ -100,6 +100,12 @@ public:
     DoublesEqualFailure(UtestShell*, const char* fileName, int lineNumber, double expected, double actual, double threshold, const SimpleString& text);
 };
 
+class DoubleInRangeFailure : public TestFailure
+{
+public:
+    DoubleInRangeFailure(UtestShell* test, const char* fileName, int lineNumber, double minimum, double maximum, double actual, const SimpleString& text);
+};
+
 class CheckEqualFailure : public TestFailure
 {
 public:
