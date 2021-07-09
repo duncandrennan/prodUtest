@@ -389,6 +389,9 @@ void UtestShell::exitTest(const TestTerminator& terminator)
 void UtestShell::assertTrue(bool condition, const char *checkString, const char *conditionString, const char* text, const char *fileName, int lineNumber, const TestTerminator& testTerminator)
 {
     getTestResult()->countCheck();
+    getTestResult()->addExpected(StringFrom("true"),StringFrom(""));
+    getTestResult()->addResult(condition ? StringFrom("true") : StringFrom("false"));
+    getTestResult()->addInfo(StringFrom(text));
     if (!condition)
         failWith(CheckFailure(this, fileName, lineNumber, checkString, conditionString, text), testTerminator);
 }
@@ -404,6 +407,7 @@ void UtestShell::assertCstrlenEqual(long expected, const char* actual, const cha
     getTestResult()->countCheck();
     getTestResult()->addExpected(StringFrom(expected), StringFrom(""));
     getTestResult()->addResult(StringFrom(actual));
+    getTestResult()->addInfo(StringFrom(text));
     long length = (long)SimpleString::StrLen(actual);
     if (expected != length)
         failWith(LongsEqualFailure (this, fileName, lineNumber, expected, length, text), testTerminator);
@@ -424,6 +428,7 @@ void UtestShell::assertCstrNEqual(const char* expected, const char* actual, size
     getTestResult()->countCheck();
     getTestResult()->addExpected(StringFrom(expected), StringFrom(""));
     getTestResult()->addResult(StringFrom(actual));
+    getTestResult()->addInfo(StringFrom(text));
     if (actual == 0 && expected == 0) return;
     if (actual == 0 || expected == 0)
         failWith(StringEqualFailure(this, fileName, lineNumber, expected, actual, text), testTerminator);
@@ -466,6 +471,7 @@ void UtestShell::assertLongsEqual(long expected, long actual, const char* text, 
     getTestResult()->countCheck();
     getTestResult()->addExpected(StringFrom(expected), StringFrom(""));
     getTestResult()->addResult(StringFrom(actual));
+    getTestResult()->addInfo(StringFrom(text));
     if (expected != actual)
         failWith(LongsEqualFailure (this, fileName, lineNumber, expected, actual, text), testTerminator);
 }
@@ -508,6 +514,7 @@ void UtestShell::assertLongInRange(cpputest_longlong minimum, cpputest_longlong 
     getTestResult()->countCheck();
     getTestResult()->addExpected(StringFrom(minimum), StringFrom(maximum));
     getTestResult()->addResult(StringFrom(actual));
+    getTestResult()->addInfo(StringFrom(text));
 #ifdef CPPUTEST_USE_LONG_LONG
     if ((minimum > actual) || (maximum < actual))
         failWith(LongInRangeFailure(this, fileName, lineNumber, minimum, maximum, actual, text), testTerminator);
@@ -551,6 +558,7 @@ void UtestShell::assertDoubleInRange(double minimum, double maximum, double actu
     getTestResult()->countCheck();
     getTestResult()->addExpected(StringFrom(minimum), StringFrom(maximum));
     getTestResult()->addResult(StringFrom(actual));
+    getTestResult()->addInfo(StringFrom(text));
     if ((minimum > actual) || (maximum < actual))
         failWith(DoubleInRangeFailure(this, fileName, lineNumber, minimum, maximum, actual, text), testTerminator);
 }

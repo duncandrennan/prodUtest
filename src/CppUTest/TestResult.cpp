@@ -33,7 +33,7 @@
 
 TestResult::TestResult(TestOutput& p) :
     output_(p), testCount_(0), runCount_(0), checkCount_(0), failureCount_(0), filteredOutCount_(0), ignoredCount_(0), totalExecutionTime_(0), timeStarted_(0), currentTestTimeStarted_(0),
-            currentTestTotalExecutionTime_(0), currentGroupTimeStarted_(0), currentGroupTotalExecutionTime_(0), result_(""), expected_(""), expected_max_("")
+            currentTestTotalExecutionTime_(0), currentGroupTimeStarted_(0), currentGroupTotalExecutionTime_(0), result_(""), expected_(""), expected_max_(""), info_("")
 {
 }
 
@@ -72,6 +72,7 @@ void TestResult::currentTestEnded(UtestShell* test)
     result_ = "";
     expected_ = "";
     expected_max_ = "";
+    info_ = "";
 }
 
 void TestResult::addFailure(const TestFailure& failure)
@@ -89,6 +90,11 @@ void TestResult::addExpected(const SimpleString& expected, const SimpleString& e
 void TestResult::addResult(const SimpleString& result)
 {
     result_ += result;
+}
+
+void TestResult::addInfo(const SimpleString& info)
+{
+    info_ += info;
 }
 
 void TestResult::countTest()
@@ -142,6 +148,11 @@ const char * TestResult::getExpectedMax() const
 const char * TestResult::getResult() const
 {
     return result_.asCharString();
+}
+
+const char * TestResult::getInfo() const
+{
+    return info_.asCharString();
 }
 
 long TestResult::getTotalExecutionTime() const

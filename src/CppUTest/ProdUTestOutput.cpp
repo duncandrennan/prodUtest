@@ -86,6 +86,7 @@ void ProdUTestOutput::printCurrentTestEnded(const TestResult& res)
     writeToFile(StringFromFormat("\"result\":\"%s\",", res.getResult()));
     writeToFile(StringFromFormat("\"expected\":\"%s\",", res.getExpected()));
     writeToFile(StringFromFormat("\"expected_max\":\"%s\",", res.getExpectedMax()));
+    writeToFile(StringFromFormat("\"info\":\"%s\",", res.getInfo()));
     writeToFile(StringFromFormat("\"duration\":%lu,", res.getCurrentTestTotalExecutionTime()));
     writeToFile(StringFrom("\"pass\":") + StringFrom(res.getCurrentTestPassed()));
     writeToFile("}");

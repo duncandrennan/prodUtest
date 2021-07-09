@@ -63,6 +63,7 @@ public:
 
     virtual void addExpected(const SimpleString& expected, const SimpleString& expected_max);
     virtual void addResult(const SimpleString& result);
+    virtual void addInfo(const SimpleString& info);
 
     int getTestCount() const
     {
@@ -92,6 +93,7 @@ public:
     const char * getExpected() const;
     const char * getExpectedMax() const;
     const char * getResult() const;
+    const char * getInfo() const;
 
     long getTotalExecutionTime() const;
     void setTotalExecutionTime(long exTime);
@@ -119,6 +121,7 @@ private:
     SimpleString result_;
     SimpleString expected_;
     SimpleString expected_max_;
+    SimpleString info_;
 };
 
 #endif
