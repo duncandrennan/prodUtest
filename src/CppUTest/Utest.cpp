@@ -557,7 +557,7 @@ void UtestShell::assertDoubleInRange(double minimum, double maximum, double actu
 {
     getTestResult()->countCheck();
     getTestResult()->addExpected(StringFrom(minimum), StringFrom(maximum));
-    getTestResult()->addResult(StringFrom(actual));
+    getTestResult()->addResult(StringFromFormat("%.*f", 6, actual));
     getTestResult()->addInfo(StringFrom(text));
     if ((minimum > actual) || (maximum < actual))
         failWith(DoubleInRangeFailure(this, fileName, lineNumber, minimum, maximum, actual, text), testTerminator);
