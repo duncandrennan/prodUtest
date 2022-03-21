@@ -23,7 +23,7 @@ void ProdUTestOutput::printTestsStarted()
     struct tm *tmp = gmtime(&tm);
     strftime(dateTime, 80, "%Y%m%d_%H%M%S", tmp);
     
-    SimpleString fileName = StringFromFormat("%s_log.json", dateTime);
+    SimpleString fileName = StringFromFormat("logs/%s_log.json", dateTime);
 
     print("Logging to:");
     print(fileName.asCharString());
