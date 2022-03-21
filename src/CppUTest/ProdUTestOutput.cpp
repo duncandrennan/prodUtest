@@ -91,7 +91,7 @@ void ProdUTestOutput::printCurrentTestEnded(const TestResult& res)
     writeToFile(StringFrom("\"pass\":") + StringFrom(res.getCurrentTestPassed()));
     writeToFile("}");
 
-    if (!finalTest_) {
+    if (!finalTest_ && res.getCurrentTestPassed()) {
         writeToFile(",");
     }
 }
