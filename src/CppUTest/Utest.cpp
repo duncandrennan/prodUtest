@@ -416,6 +416,9 @@ void UtestShell::assertCstrlenEqual(long expected, const char* actual, const cha
 void UtestShell::assertCstrEqual(const char* expected, const char* actual, const char* text, const char* fileName, int lineNumber, const TestTerminator& testTerminator)
 {
     getTestResult()->countCheck();
+    getTestResult()->addExpected(StringFrom(expected), StringFrom(""));
+    getTestResult()->addResult(StringFrom(actual));
+    getTestResult()->addInfo(StringFrom(text));
     if (actual == 0 && expected == 0) return;
     if (actual == 0 || expected == 0)
         failWith(StringEqualFailure(this, fileName, lineNumber, expected, actual, text), testTerminator);
