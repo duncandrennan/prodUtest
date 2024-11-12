@@ -1,10 +1,4 @@
 # Production Unit Test - prodUtest
-# CppUTest
-
-[![GitHub Actions](https://github.com/cpputest/cpputest/actions/workflows/basic.yml/badge.svg)](https://github.com/cpputest/cpputest/actions/workflows/basic.yml)
-[![AppveyorBuild status](https://ci.appveyor.com/api/projects/status/irh38i4wblsb5tew?svg=true)](https://ci.appveyor.com/project/basvodde/cpputest)
-[![Coverage Status](https://coveralls.io/repos/cpputest/cpputest/badge.svg?branch=master&service=github)](https://coveralls.io/github/cpputest/cpputest?branch=master)
-[![ConanCenter package](https://repology.org/badge/version-for-repo/conancenter/cpputest.svg)](https://conan.io/center/cpputest)
 
 prodUtest is a framework for production testing of electronic products
 
@@ -39,10 +33,6 @@ prodUtest is built on top of CppUTest, a C++ unit testing framework
 
 * You can debug with GDB
 * If you've compiled for 32-bit then install TDM32 and use the 32-bit GDB
-[More information on the project page](https://cpputest.github.io)
-
-Slack channel:
-[Join if link not expired](https://join.slack.com/t/cpputest/shared_invite/zt-epq97u9h-6yBQHHl2cvUADjEENtdASw)
 
 ## Getting Started
 
