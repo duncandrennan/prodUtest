@@ -101,7 +101,7 @@ public:
 class DoubleInRangeFailure : public TestFailure
 {
 public:
-    DoubleInRangeFailure(UtestShell* test, const char* fileName, int lineNumber, double minimum, double maximum, double actual, const SimpleString& text);
+    DoubleInRangeFailure(UtestShell* test, const char* fileName, size_t lineNumber, double minimum, double maximum, double actual, const SimpleString& text);
 };
 
 class CheckEqualFailure : public TestFailure
@@ -161,7 +161,7 @@ public:
 class LongInRangeFailure : public TestFailure
 {
 public:
-    LongInRangeFailure(UtestShell* test, const char* fileName, int lineNumber, cpputest_longlong minimum, cpputest_longlong maximum, cpputest_longlong actual, const SimpleString& text);
+    LongInRangeFailure(UtestShell* test, const char* fileName, size_t lineNumber, cpputest_longlong minimum, cpputest_longlong maximum, cpputest_longlong actual, const SimpleString& text);
 };
 
 class SignedBytesEqualFailure : public TestFailure

@@ -132,6 +132,7 @@ public:
     void countCheck();
 
     virtual void assertTrue(bool condition, const char *checkString, const char *conditionString, const char* text, const char *fileName, size_t lineNumber, const TestTerminator& testTerminator = getCurrentTestTerminator());
+    virtual void assertCstrlenEqual(long expected, const char* actual, const char* text, const char* fileName, size_t lineNumber, const TestTerminator& testTerminator = getCurrentTestTerminator());
     virtual void assertCstrEqual(const char *expected, const char *actual, const char* text, const char *fileName, size_t lineNumber, const TestTerminator& testTerminator = getCurrentTestTerminator());
     virtual void assertCstrNEqual(const char *expected, const char *actual, size_t length, const char* text, const char *fileName, size_t lineNumber, const TestTerminator& testTerminator = getCurrentTestTerminator());
     virtual void assertCstrNoCaseEqual(const char *expected, const char *actual, const char* text, const char *fileName, size_t lineNumber);
