@@ -552,7 +552,7 @@ void UtestShell::assertUnsignedLongLongsEqual(cpputest_ulonglong expected, cpput
 #endif
 }
 
-void UtestShell::assertLongInRange(cpputest_longlong minimum, cpputest_longlong maximum, cpputest_longlong actual, const char* text, const char* fileName, int lineNumber, const TestTerminator& testTerminator)
+void UtestShell::assertLongInRange(cpputest_longlong minimum, cpputest_longlong maximum, cpputest_longlong actual, const char* text, const char* fileName, size_t lineNumber, const TestTerminator& testTerminator)
 {
     getTestResult()->countCheck();
     getTestResult()->addExpected(StringFrom(minimum), StringFrom(maximum));
@@ -596,7 +596,7 @@ void UtestShell::assertDoublesEqual(double expected, double actual, double thres
         failWith(DoublesEqualFailure(this, fileName, lineNumber, expected, actual, threshold, text), testTerminator);
 }
 
-void UtestShell::assertDoubleInRange(double minimum, double maximum, double actual, const char* text, const char* fileName, int lineNumber, const TestTerminator& testTerminator)
+void UtestShell::assertDoubleInRange(double minimum, double maximum, double actual, const char* text, const char* fileName, size_t lineNumber, const TestTerminator& testTerminator)
 {
     getTestResult()->countCheck();
     getTestResult()->addExpected(StringFrom(minimum), StringFrom(maximum));

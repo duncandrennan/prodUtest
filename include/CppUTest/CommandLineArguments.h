@@ -115,7 +115,7 @@ private:
     void addTestToRunBasedOnVerboseOutput(int ac, const char *const *av, int& index, const char* parameterName);
     bool setOutputType(int ac, const char *const *av, int& index);
     void setPackageName(int ac, const char *const *av, int& index);
-    void addDefine(int ac, const char** av, int& index);
+    void addDefine(int ac, const char *const *av, int& index);
 
     CommandLineArguments(const CommandLineArguments&);
     CommandLineArguments& operator=(const CommandLineArguments&);

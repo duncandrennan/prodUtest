@@ -88,7 +88,7 @@ public:
     return fakeTCOutputWhichIsReallyABuffer;
   }
 
-  TestOutput* createProdUTestOutput()
+  TestOutput* createProdUTestOutput() CPPUTEST_OVERRIDE
   {
     fakeProdUOutputWhichIsReallyABuffer = new StringBufferTestOutput;
     return fakeProdUOutputWhichIsReallyABuffer;

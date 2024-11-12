@@ -6,7 +6,7 @@
 ProdUTestOutput::ProdUTestOutput() :
      file_(NULL), errorCode_(0), finalTest_(false)
 {
-    verbose();
+    verbose(level_verbose);
 }
 
 ProdUTestOutput::~ProdUTestOutput()
@@ -71,7 +71,7 @@ void ProdUTestOutput::printCurrentTestEnded(const TestResult& res)
         print("PASS;0;");
     } else {
         print("FAIL;");
-        print(errorCode_);
+        print((long)errorCode_); 
         print(";");
     }
     print(res.getResult());
@@ -106,14 +106,6 @@ void ProdUTestOutput::printFailure(const TestFailure& failure)
 void ProdUTestOutput::printFileAndLineForFailure(const TestFailure& failure)
 {
     printErrorInFileOnLineFormattedForWorkingEnvironment(failure.getFileName(), failure.getFailureLineNumber());
-}
-
-void ProdUTestOutput::printEclipseErrorInFileOnLine(SimpleString file, int lineNumber)
-{
-    print(file.asCharString());
-    print(":");
-    print(lineNumber);
-    print(";");
 }
 
 void ProdUTestOutput::openFileForWrite(const SimpleString& fileName)
