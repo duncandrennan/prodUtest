@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -25,10 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GTEST__H_
-#define GTEST__H_
+#ifndef GTEST_H_
+#define GTEST_H_
 
 #undef new
+#undef strdup
+#undef strndup
 
 #undef RUN_ALL_TESTS
 
@@ -37,6 +39,12 @@
 #ifdef CPPUTEST_USE_NEW_MACROS
 #include "CppUTest/MemoryLeakDetectorNewMacros.h"
 #endif
+
+#ifdef CPPUTEST_USE_MALLOC_MACROS
+#include "CppUTest/MemoryLeakDetectorMallocMacros.h"
+#endif
+
+#include "CppUTestExt/GTestSupport.h"
 
 #ifndef RUN_ALL_TESTS
 #define GTEST_VERSION_GTEST_1_7

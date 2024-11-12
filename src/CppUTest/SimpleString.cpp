@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -30,11 +30,83 @@
 #include "CppUTest/PlatformSpecificFunctions.h"
 #include "CppUTest/TestMemoryAllocator.h"
 
-TestMemoryAllocator* SimpleString::stringAllocator_ = NULL;
+GlobalSimpleStringAllocatorStash::GlobalSimpleStringAllocatorStash()
+    : originalAllocator_(NULLPTR)
+{
+}
+
+void GlobalSimpleStringAllocatorStash::save()
+{
+    originalAllocator_ = SimpleString::getStringAllocator();
+}
+
+void GlobalSimpleStringAllocatorStash::restore()
+{
+    SimpleString::setStringAllocator(originalAllocator_);
+}
+
+
+GlobalSimpleStringMemoryAccountant::GlobalSimpleStringMemoryAccountant()
+    : allocator_(NULLPTR)
+{
+    accountant_ = new MemoryAccountant();
+}
+
+GlobalSimpleStringMemoryAccountant::~GlobalSimpleStringMemoryAccountant()
+{
+    restoreAllocator();
+
+    delete accountant_;
+    delete allocator_;
+}
+
+void GlobalSimpleStringMemoryAccountant::restoreAllocator()
+{
+    if (allocator_ && (SimpleString::getStringAllocator() == allocator_))
+        SimpleString::setStringAllocator(allocator_->originalAllocator());
+}
+
+void GlobalSimpleStringMemoryAccountant::useCacheSizes(size_t cacheSizes[], size_t length)
+{
+    accountant_->useCacheSizes(cacheSizes, length);
+}
+
+void GlobalSimpleStringMemoryAccountant::start()
+{
+    if (allocator_ != NULLPTR)
+      return;
+
+    allocator_ = new AccountingTestMemoryAllocator(*accountant_, SimpleString::getStringAllocator());
+
+    SimpleString::setStringAllocator(allocator_);
+}
+
+void GlobalSimpleStringMemoryAccountant::stop()
+{
+    if (allocator_ == NULLPTR)
+        FAIL("Global SimpleString allocator stopped without starting");
+
+    if (SimpleString::getStringAllocator() != allocator_)
+      FAIL("GlobalStrimpleStringMemoryAccountant: allocator has changed between start and stop!");
+
+    restoreAllocator();
+}
+
+SimpleString GlobalSimpleStringMemoryAccountant::report()
+{
+    return accountant_->report();
+}
+
+AccountingTestMemoryAllocator* GlobalSimpleStringMemoryAccountant::getAllocator()
+{
+    return allocator_;
+}
+
+TestMemoryAllocator* SimpleString::stringAllocator_ = NULLPTR;
 
 TestMemoryAllocator* SimpleString::getStringAllocator()
 {
-    if (stringAllocator_ == NULL)
+    if (stringAllocator_ == NULLPTR)
         return defaultNewArrayAllocator();
     return stringAllocator_;
 }
@@ -45,14 +117,14 @@ void SimpleString::setStringAllocator(TestMemoryAllocator* allocator)
 }
 
 /* Avoid using the memory leak detector INSIDE SimpleString as its used inside the detector */
-char* SimpleString::allocStringBuffer(size_t _size, const char* file, int line)
+char* SimpleString::allocStringBuffer(size_t _size, const char* file, size_t line)
 {
     return getStringAllocator()->alloc_memory(_size, file, line);
 }
 
-void SimpleString::deallocStringBuffer(char* str, const char* file, int line)
+void SimpleString::deallocStringBuffer(char* str, size_t size, const char* file, size_t line)
 {
-    getStringAllocator()->free_memory(str, file, line);
+    getStringAllocator()->free_memory(str, size, file, line);
 }
 
 char* SimpleString::getEmptyString() const
@@ -60,6 +132,20 @@ char* SimpleString::getEmptyString() const
     char* empty = allocStringBuffer(1, __FILE__, __LINE__);
     empty[0] = '\0';
     return empty;
+}
+
+// does not support + or - prefixes
+unsigned SimpleString::AtoU(const char* str)
+{
+    while (isSpace(*str)) str++;
+
+    unsigned result = 0;
+    for(; isDigit(*str) && *str >= '0'; str++)
+    {
+        result *= 10;
+        result += static_cast<unsigned>(*str - '0');
+    }
+    return result;
 }
 
 int SimpleString::AtoI(const char* str)
@@ -80,9 +166,11 @@ int SimpleString::AtoI(const char* str)
 
 int SimpleString::StrCmp(const char* s1, const char* s2)
 {
-   while(*s1 && *s1 == *s2)
-       s1++, s2++;
-   return *(unsigned char *) s1 - *(unsigned char *) s2;
+   while(*s1 && *s1 == *s2) {
+       ++s1;
+       ++s2;
+   }
+   return *(const unsigned char *) s1 - *(const unsigned char *) s2;
 }
 
 size_t SimpleString::StrLen(const char* str)
@@ -95,29 +183,33 @@ size_t SimpleString::StrLen(const char* str)
 int SimpleString::StrNCmp(const char* s1, const char* s2, size_t n)
 {
     while (n && *s1 && *s1 == *s2) {
-        n--, s1++, s2++;
+        --n;
+        ++s1;
+        ++s2;
     }
-    return n ? *(unsigned char *) s1 - *(unsigned char *) s2 : 0;
+    return n ? *(const unsigned char *) s1 - *(const unsigned char *) s2 : 0;
 }
 
 char* SimpleString::StrNCpy(char* s1, const char* s2, size_t n)
 {
     char* result = s1;
 
-    if((NULL == s1) || (0 == n)) return result;
+    if((NULLPTR == s1) || (0 == n)) return result;
 
-    while ((*s1++ = *s2++) && --n != 0)
-        ;
+    *s1 = *s2;
+    while ((--n != 0) && *s1){
+        *++s1 = *++s2;
+    }
     return result;
 }
 
-char* SimpleString::StrStr(const char* s1, const char* s2)
+const char* SimpleString::StrStr(const char* s1, const char* s2)
 {
-    if(!*s2) return (char*) s1;
+    if(!*s2) return s1;
     for (; *s1; s1++)
         if (StrNCmp(s1, s2, StrLen(s2)) == 0)
-            return (char*) s1;
-    return NULL;
+            return s1;
+    return NULLPTR;
 }
 
 char SimpleString::ToLower(char ch)
@@ -131,28 +223,87 @@ int SimpleString::MemCmp(const void* s1, const void *s2, size_t n)
     const unsigned char* p2 = (const unsigned char*) s2;
 
     while (n--)
-        if (*p1 != *p2)
+        if (*p1 != *p2) {
             return *p1 - *p2;
-        else
-            p1++, p2++;
+        } else {
+            ++p1;
+            ++p2;
+        }
     return 0;
 }
 
-SimpleString::SimpleString(const char *otherBuffer)
+void SimpleString::deallocateInternalBuffer()
 {
-    if (otherBuffer == 0) {
-        buffer_ = getEmptyString();
-    }
-    else {
-        buffer_ = copyToNewBuffer(otherBuffer);
+    if (buffer_) {
+        deallocStringBuffer(buffer_, bufferSize_, __FILE__, __LINE__);
+        buffer_ = NULLPTR;
+        bufferSize_ = 0;
     }
 }
 
+void SimpleString::setInternalBufferAsEmptyString()
+{
+    deallocateInternalBuffer();
+
+    bufferSize_ = 1;
+    buffer_ = getEmptyString();
+}
+
+void SimpleString::copyBufferToNewInternalBuffer(const char* otherBuffer, size_t bufferSize)
+{
+    deallocateInternalBuffer();
+
+    bufferSize_ = bufferSize;
+    buffer_ = copyToNewBuffer(otherBuffer, bufferSize_);
+}
+
+void SimpleString::setInternalBufferToNewBuffer(size_t bufferSize)
+{
+    deallocateInternalBuffer();
+
+    bufferSize_ = bufferSize;
+    buffer_ = allocStringBuffer(bufferSize_, __FILE__, __LINE__);
+    buffer_[0] = '\0';
+}
+
+void SimpleString::setInternalBufferTo(char* buffer, size_t bufferSize)
+{
+    deallocateInternalBuffer();
+
+    bufferSize_ = bufferSize;
+    buffer_ = buffer;
+}
+
+void SimpleString::copyBufferToNewInternalBuffer(const SimpleString& otherBuffer)
+{
+    copyBufferToNewInternalBuffer(otherBuffer.buffer_, otherBuffer.size() + 1);
+}
+
+void SimpleString::copyBufferToNewInternalBuffer(const char* otherBuffer)
+{
+    copyBufferToNewInternalBuffer(otherBuffer, StrLen(otherBuffer) + 1);
+}
+
+const char* SimpleString::getBuffer() const
+{
+    return buffer_;
+}
+
+SimpleString::SimpleString(const char *otherBuffer)
+    : buffer_(NULLPTR), bufferSize_(0)
+{
+    if (otherBuffer == NULLPTR)
+        setInternalBufferAsEmptyString();
+    else
+        copyBufferToNewInternalBuffer(otherBuffer);
+}
+
 SimpleString::SimpleString(const char *other, size_t repeatCount)
+    : buffer_(NULLPTR), bufferSize_(0)
 {
     size_t otherStringLength = StrLen(other);
-    size_t len = otherStringLength * repeatCount + 1;
-    buffer_ = allocStringBuffer(len, __FILE__, __LINE__);
+    setInternalBufferToNewBuffer(otherStringLength * repeatCount + 1);
+
     char* next = buffer_;
     for (size_t i = 0; i < repeatCount; i++) {
         StrNCpy(next, other, otherStringLength + 1);
@@ -162,22 +313,21 @@ SimpleString::SimpleString(const char *other, size_t repeatCount)
 }
 
 SimpleString::SimpleString(const SimpleString& other)
+    : buffer_(NULLPTR), bufferSize_(0)
 {
-    buffer_ = copyToNewBuffer(other.buffer_);
+    copyBufferToNewInternalBuffer(other.getBuffer());
 }
 
 SimpleString& SimpleString::operator=(const SimpleString& other)
 {
-    if (this != &other) {
-        deallocStringBuffer(buffer_, __FILE__, __LINE__);
-        buffer_ = copyToNewBuffer(other.buffer_);
-    }
+    if (this != &other)
+        copyBufferToNewInternalBuffer(other);
     return *this;
 }
 
 bool SimpleString::contains(const SimpleString& other) const
 {
-    return StrStr(buffer_, other.buffer_) != 0;
+    return StrStr(getBuffer(), other.getBuffer()) != NULLPTR;
 }
 
 bool SimpleString::containsNoCase(const SimpleString& other) const
@@ -187,28 +337,36 @@ bool SimpleString::containsNoCase(const SimpleString& other) const
 
 bool SimpleString::startsWith(const SimpleString& other) const
 {
-    if (StrLen(other.buffer_) == 0) return true;
+    if (other.size() == 0) return true;
     else if (size() == 0) return false;
-    else return StrStr(buffer_, other.buffer_) == buffer_;
+    else return StrStr(getBuffer(), other.getBuffer()) == getBuffer();
 }
 
 bool SimpleString::endsWith(const SimpleString& other) const
 {
-    size_t buffer_length = size();
-    size_t other_buffer_length = StrLen(other.buffer_);
-    if (other_buffer_length == 0) return true;
-    if (buffer_length == 0) return false;
-    if (buffer_length < other_buffer_length) return false;
-    return StrCmp(buffer_ + buffer_length - other_buffer_length, other.buffer_) == 0;
+    size_t length = size();
+    size_t other_length = other.size();
+
+    if (other_length == 0) return true;
+    if (length == 0) return false;
+    if (length < other_length) return false;
+
+    return StrCmp(getBuffer() + length - other_length, other.getBuffer()) == 0;
 }
 
 size_t SimpleString::count(const SimpleString& substr) const
 {
     size_t num = 0;
-    char* str = buffer_;
-    while (*str && (str = StrStr(str, substr.buffer_))) {
-        num++;
+    const char* str = getBuffer();
+    const char* strpart = NULLPTR;
+    if (*str){
+        strpart = StrStr(str, substr.getBuffer());
+    }
+    while (*str && strpart) {
+        str = strpart;
         str++;
+        num++;
+        strpart = StrStr(str, substr.getBuffer());
     }
     return num;
 }
@@ -219,11 +377,11 @@ void SimpleString::split(const SimpleString& delimiter, SimpleStringCollection& 
     size_t extraEndToken = (endsWith(delimiter)) ? 0 : 1U;
     col.allocate(num + extraEndToken);
 
-    char* str = buffer_;
-    char* prev;
+    const char* str = getBuffer();
+    const char* prev;
     for (size_t i = 0; i < num; ++i) {
         prev = str;
-        str = StrStr(str, delimiter.buffer_) + 1;
+        str = StrStr(str, delimiter.getBuffer()) + 1;
         col[i] = SimpleString(prev).subString(0, size_t (str - prev));
     }
     if (extraEndToken) {
@@ -235,13 +393,16 @@ void SimpleString::replace(char to, char with)
 {
     size_t s = size();
     for (size_t i = 0; i < s; i++) {
-        if (buffer_[i] == to) buffer_[i] = with;
+        if (getBuffer()[i] == to) buffer_[i] = with;
     }
 }
 
 void SimpleString::replace(const char* to, const char* with)
 {
     size_t c = count(to);
+    if (c == 0) {
+        return;
+    }
     size_t len = size();
     size_t tolen = StrLen(to);
     size_t withlen = StrLen(with);
@@ -251,25 +412,86 @@ void SimpleString::replace(const char* to, const char* with)
     if (newsize > 1) {
         char* newbuf = allocStringBuffer(newsize, __FILE__, __LINE__);
         for (size_t i = 0, j = 0; i < len;) {
-            if (StrNCmp(&buffer_[i], to, tolen) == 0) {
+            if (StrNCmp(&getBuffer()[i], to, tolen) == 0) {
                 StrNCpy(&newbuf[j], with, withlen + 1);
                 j += withlen;
                 i += tolen;
             }
             else {
-                newbuf[j] = buffer_[i];
+                newbuf[j] = getBuffer()[i];
                 j++;
                 i++;
             }
         }
-        deallocStringBuffer(buffer_, __FILE__, __LINE__);
-        buffer_ = newbuf;
-        buffer_[newsize - 1] = '\0';
+        newbuf[newsize - 1] = '\0';
+        setInternalBufferTo(newbuf, newsize);
     }
-    else {
-        deallocStringBuffer(buffer_, __FILE__, __LINE__);
-        buffer_ = getEmptyString();
+    else
+        setInternalBufferAsEmptyString();
+}
+
+SimpleString SimpleString::printable() const
+{
+    static const char* shortEscapeCodes[] =
+    {
+        "\\a",
+        "\\b",
+        "\\t",
+        "\\n",
+        "\\v",
+        "\\f",
+        "\\r"
+    };
+
+    SimpleString result;
+    result.setInternalBufferToNewBuffer(getPrintableSize() + 1);
+
+    size_t str_size = size();
+    size_t j = 0;
+    for (size_t i = 0; i < str_size; i++)
+    {
+        char c = buffer_[i];
+        if (isControlWithShortEscapeSequence(c))
+        {
+            StrNCpy(&result.buffer_[j], shortEscapeCodes[(unsigned char)(c - '\a')], 2);
+            j += 2;
+        }
+        else if (isControl(c))
+        {
+            SimpleString hexEscapeCode = StringFromFormat("\\x%02X ", c);
+            StrNCpy(&result.buffer_[j], hexEscapeCode.asCharString(), 4);
+            j += 4;
+        }
+        else
+        {
+            result.buffer_[j] = c;
+            j++;
+        }
     }
+    result.buffer_[j] = 0;
+
+    return result;
+}
+
+size_t SimpleString::getPrintableSize() const
+{
+    size_t str_size = size();
+    size_t printable_str_size = str_size;
+
+    for (size_t i = 0; i < str_size; i++)
+    {
+        char c = buffer_[i];
+        if (isControlWithShortEscapeSequence(c))
+        {
+            printable_str_size += 1;
+        }
+        else if (isControl(c))
+        {
+            printable_str_size += 3;
+        }
+    }
+
+    return printable_str_size;
 }
 
 SimpleString SimpleString::lowerCase() const
@@ -278,19 +500,19 @@ SimpleString SimpleString::lowerCase() const
 
     size_t str_size = str.size();
     for (size_t i = 0; i < str_size; i++)
-        str.buffer_[i] = ToLower(str.buffer_[i]);
+        str.buffer_[i] = ToLower(str.getBuffer()[i]);
 
     return str;
 }
 
 const char *SimpleString::asCharString() const
 {
-    return buffer_;
+    return getBuffer();
 }
 
 size_t SimpleString::size() const
 {
-    return StrLen(buffer_);
+    return StrLen(getBuffer());
 }
 
 bool SimpleString::isEmpty() const
@@ -298,10 +520,9 @@ bool SimpleString::isEmpty() const
     return size() == 0;
 }
 
-
 SimpleString::~SimpleString()
 {
-    deallocStringBuffer(buffer_, __FILE__, __LINE__);
+    deallocateInternalBuffer();
 }
 
 bool operator==(const SimpleString& left, const SimpleString& right)
@@ -322,14 +543,14 @@ bool operator!=(const SimpleString& left, const SimpleString& right)
 
 SimpleString SimpleString::operator+(const SimpleString& rhs) const
 {
-    SimpleString t(buffer_);
-    t += rhs.buffer_;
+    SimpleString t(getBuffer());
+    t += rhs.getBuffer();
     return t;
 }
 
 SimpleString& SimpleString::operator+=(const SimpleString& rhs)
 {
-    return operator+=(rhs.buffer_);
+    return operator+=(rhs.getBuffer());
 }
 
 SimpleString& SimpleString::operator+=(const char* rhs)
@@ -337,10 +558,10 @@ SimpleString& SimpleString::operator+=(const char* rhs)
     size_t originalSize = this->size();
     size_t additionalStringSize = StrLen(rhs) + 1;
     size_t sizeOfNewString = originalSize + additionalStringSize;
-    char* tbuffer = copyToNewBuffer(this->buffer_, sizeOfNewString);
+    char* tbuffer = copyToNewBuffer(this->getBuffer(), sizeOfNewString);
     StrNCpy(tbuffer + originalSize, rhs, additionalStringSize);
-    deallocStringBuffer(this->buffer_, __FILE__, __LINE__);
-    this->buffer_ = tbuffer;
+
+    setInternalBufferTo(tbuffer, sizeOfNewString);
     return *this;
 }
 
@@ -361,7 +582,7 @@ SimpleString SimpleString::subString(size_t beginPos, size_t amount) const
 {
     if (beginPos > size()-1) return "";
 
-    SimpleString newString = buffer_ + beginPos;
+    SimpleString newString = getBuffer() + beginPos;
 
     if (newString.size() > amount)
         newString.buffer_[amount] = '\0';
@@ -376,7 +597,7 @@ SimpleString SimpleString::subString(size_t beginPos) const
 
 char SimpleString::at(size_t pos) const
 {
-    return buffer_[pos];
+    return getBuffer()[pos];
 }
 
 size_t SimpleString::find(char ch) const
@@ -388,7 +609,7 @@ size_t SimpleString::findFrom(size_t starting_position, char ch) const
 {
     size_t length = size();
     for (size_t i = starting_position; i < length; i++)
-        if (buffer_[i] == ch) return i;
+        if (at(i) == ch) return i;
     return npos;
 }
 
@@ -405,21 +626,20 @@ SimpleString SimpleString::subStringFromTill(char startChar, char lastExcludedCh
 
 char* SimpleString::copyToNewBuffer(const char* bufferToCopy, size_t bufferSize)
 {
-    if(bufferSize == 0) bufferSize = StrLen(bufferToCopy) + 1;
-
     char* newBuffer = allocStringBuffer(bufferSize, __FILE__, __LINE__);
     StrNCpy(newBuffer, bufferToCopy, bufferSize);
     newBuffer[bufferSize-1] = '\0';
     return newBuffer;
 }
 
+
 void SimpleString::copyToBuffer(char* bufferToCopy, size_t bufferSize) const
 {
-    if (bufferToCopy == NULL || bufferSize == 0) return;
+    if (bufferToCopy == NULLPTR || bufferSize == 0) return;
 
-    size_t sizeToCopy = (bufferSize-1 < size()) ? bufferSize : size();
+    size_t sizeToCopy = (bufferSize-1 < size()) ? (bufferSize-1) : size();
 
-    StrNCpy(bufferToCopy, buffer_, sizeToCopy);
+    StrNCpy(bufferToCopy, getBuffer(), sizeToCopy);
     bufferToCopy[sizeToCopy] = '\0';
 }
 
@@ -438,6 +658,16 @@ bool SimpleString::isUpper(char ch)
     return 'A' <= ch && 'Z' >= ch;
 }
 
+bool SimpleString::isControl(char ch)
+{
+    return ch < ' ' || ch == char(0x7F);
+}
+
+bool SimpleString::isControlWithShortEscapeSequence(char ch)
+{
+    return '\a' <= ch && '\r' >= ch;
+}
+
 SimpleString StringFrom(bool value)
 {
     return SimpleString(StringFromFormat("%s", value ? "true" : "false"));
@@ -450,7 +680,12 @@ SimpleString StringFrom(const char *value)
 
 SimpleString StringFromOrNull(const char * expected)
 {
-    return (expected) ? StringFrom(expected) : "(null)";
+    return (expected) ? StringFrom(expected) : StringFrom("(null)");
+}
+
+SimpleString PrintableStringFromOrNull(const char * expected)
+{
+    return (expected) ? StringFrom(expected).printable() : StringFrom("(null)");
 }
 
 SimpleString StringFrom(int value)
@@ -478,6 +713,11 @@ SimpleString HexStringFrom(long value)
     return StringFromFormat("%lx", value);
 }
 
+SimpleString HexStringFrom(int value)
+{
+    return StringFromFormat("%x", value);
+}
+
 SimpleString HexStringFrom(signed char value)
 {
     SimpleString result = StringFromFormat("%x", value);
@@ -493,7 +733,55 @@ SimpleString HexStringFrom(unsigned long value)
     return StringFromFormat("%lx", value);
 }
 
-#ifdef CPPUTEST_USE_LONG_LONG
+SimpleString HexStringFrom(unsigned int value)
+{
+    return StringFromFormat("%x", value);
+}
+
+SimpleString BracketsFormattedHexStringFrom(int value)
+{
+    return BracketsFormattedHexString(HexStringFrom(value));
+}
+
+SimpleString BracketsFormattedHexStringFrom(unsigned int value)
+{
+    return BracketsFormattedHexString(HexStringFrom(value));
+}
+
+SimpleString BracketsFormattedHexStringFrom(long value)
+{
+    return BracketsFormattedHexString(HexStringFrom(value));
+}
+
+
+SimpleString BracketsFormattedHexStringFrom(unsigned long value)
+{
+    return BracketsFormattedHexString(HexStringFrom(value));
+}
+
+SimpleString BracketsFormattedHexStringFrom(signed char value)
+{
+    return BracketsFormattedHexString(HexStringFrom(value));
+}
+
+SimpleString BracketsFormattedHexString(SimpleString hexString)
+{
+    return SimpleString("(0x") + hexString + ")" ;
+}
+
+/*
+ * ARM compiler has only partial support for C++11.
+ * Specifically nullptr_t is not officially supported
+ */
+#if __cplusplus > 199711L && !defined __arm__ && CPPUTEST_USE_STD_CPP_LIB
+SimpleString StringFrom(const std::nullptr_t value)
+{
+    (void) value;
+    return "(null)";
+}
+#endif
+
+#if CPPUTEST_USE_LONG_LONG
 
 SimpleString StringFrom(cpputest_longlong value)
 {
@@ -502,7 +790,7 @@ SimpleString StringFrom(cpputest_longlong value)
 
 SimpleString StringFrom(cpputest_ulonglong value)
 {
-    return StringFromFormat("%llu (0x%llx)", value, value);
+    return StringFromFormat("%llu", value);
 }
 
 SimpleString HexStringFrom(cpputest_longlong value)
@@ -523,6 +811,17 @@ SimpleString HexStringFrom(const void* value)
 SimpleString HexStringFrom(void (*value)())
 {
     return HexStringFrom((cpputest_ulonglong) value);
+}
+
+SimpleString BracketsFormattedHexStringFrom(cpputest_longlong value)
+{
+    return BracketsFormattedHexString(HexStringFrom(value));
+}
+
+
+SimpleString BracketsFormattedHexStringFrom(cpputest_ulonglong value)
+{
+    return BracketsFormattedHexString(HexStringFrom(value));
 }
 
 #else   /* CPPUTEST_USE_LONG_LONG */
@@ -579,6 +878,17 @@ SimpleString HexStringFrom(void (*value)())
     return StringFromFormat("%lx", convertFunctionPointerToLongValue(value));
 }
 
+SimpleString BracketsFormattedHexStringFrom(cpputest_longlong)
+{
+    return "";
+}
+
+
+SimpleString BracketsFormattedHexStringFrom(cpputest_ulonglong)
+{
+    return "";
+}
+
 #endif  /* CPPUTEST_USE_LONG_LONG */
 
 SimpleString StringFrom(double value, int precision)
@@ -614,7 +924,7 @@ SimpleString StringFromFormat(const char* format, ...)
 
 SimpleString StringFrom(unsigned int i)
 {
-    return StringFromFormat("%10u (0x%08x)", i, i);
+    return StringFromFormat("%u", i);
 }
 
 #if CPPUTEST_USE_STD_CPP_LIB
@@ -630,13 +940,8 @@ SimpleString StringFrom(const std::string& value)
 
 SimpleString StringFrom(unsigned long i)
 {
-    return StringFromFormat("%lu (0x%lx)", i, i);
+    return StringFromFormat("%lu", i);
 }
-
-//Kludge to get a va_copy in VC++ V6
-#ifndef va_copy
-#define va_copy(copy, original) copy = original;
-#endif
 
 SimpleString VStringFromFormat(const char* format, va_list args)
 {
@@ -659,7 +964,7 @@ SimpleString VStringFromFormat(const char* format, va_list args)
         PlatformSpecificVSNprintf(newBuffer, newBufferSize, format, argsCopy);
         resultString = SimpleString(newBuffer);
 
-        SimpleString::deallocStringBuffer(newBuffer, __FILE__, __LINE__);
+        SimpleString::deallocStringBuffer(newBuffer, newBufferSize, __FILE__, __LINE__);
     }
     va_end(argsCopy);
     return resultString;
@@ -679,7 +984,7 @@ SimpleString StringFromBinary(const unsigned char* value, size_t size)
 
 SimpleString StringFromBinaryOrNull(const unsigned char* value, size_t size)
 {
-    return (value) ? StringFromBinary(value, size) : "(null)";
+    return (value) ? StringFromBinary(value, size) : StringFrom("(null)");
 }
 
 SimpleString StringFromBinaryWithSize(const unsigned char* value, size_t size)
@@ -696,7 +1001,7 @@ SimpleString StringFromBinaryWithSize(const unsigned char* value, size_t size)
 
 SimpleString StringFromBinaryWithSizeOrNull(const unsigned char* value, size_t size)
 {
-    return (value) ? StringFromBinaryWithSize(value, size) : "(null)";
+    return (value) ? StringFromBinaryWithSize(value, size) : StringFrom("(null)");
 }
 
 SimpleString StringFromMaskedBits(unsigned long value, unsigned long mask, size_t byteCount)
@@ -726,19 +1031,17 @@ SimpleString StringFromMaskedBits(unsigned long value, unsigned long mask, size_
 
 SimpleString StringFromOrdinalNumber(unsigned int number)
 {
-    unsigned int onesDigit = number % 10;
+    const char* suffix = "th";
 
-    const char* suffix;
-    if (number >= 11 && number <= 13) {
-        suffix = "th";
-    } else if (3 == onesDigit) {
-        suffix = "rd";
-    } else if (2 == onesDigit) {
-        suffix = "nd";
-    } else if (1 == onesDigit) {
-        suffix = "st";
-    } else {
-        suffix = "th";
+    if ((number < 11) || (number > 13)) {
+        unsigned int const onesDigit = number % 10;
+        if (3 == onesDigit) {
+            suffix = "rd";
+        } else if (2 == onesDigit) {
+            suffix = "nd";
+        } else if (1 == onesDigit) {
+            suffix = "st";
+        }
     }
 
     return StringFromFormat("%u%s", number, suffix);
@@ -746,7 +1049,7 @@ SimpleString StringFromOrdinalNumber(unsigned int number)
 
 SimpleStringCollection::SimpleStringCollection()
 {
-    collection_ = 0;
+    collection_ = NULLPTR;
     size_ = 0;
 }
 

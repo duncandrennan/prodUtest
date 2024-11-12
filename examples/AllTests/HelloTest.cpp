@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -34,23 +34,24 @@
 static SimpleString* buffer;
 
 TEST_GROUP(HelloWorld)
-{ static int output_method(const char* output, ...)
 {
-    va_list arguments;
-    va_start(arguments, output);
-    *buffer = VStringFromFormat(output, arguments);
-    va_end(arguments);
-    return 1;
-}
-void setup()
-{
-    buffer = new SimpleString();
-    UT_PTR_SET(PrintFormated, &output_method);
-}
-void teardown()
-{
-    delete buffer;
-}
+    static int output_method(const char* output, ...)
+    {
+        va_list arguments;
+        va_start(arguments, output);
+        *buffer = VStringFromFormat(output, arguments);
+        va_end(arguments);
+        return 1;
+    }
+    void setup() CPPUTEST_OVERRIDE
+    {
+        buffer = new SimpleString();
+        UT_PTR_SET(PrintFormated, &output_method);
+    }
+    void teardown() CPPUTEST_OVERRIDE
+    {
+        delete buffer;
+    }
 };
 
 TEST(HelloWorld, PrintOk)

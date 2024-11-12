@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -38,7 +38,7 @@ TEST_GROUP(MockExpectedCallsList)
     MockCheckedExpectedCall* call2;
     MockCheckedExpectedCall* call3;
     MockCheckedExpectedCall* call4;
-    void setup()
+    void setup() CPPUTEST_OVERRIDE
     {
         list = new MockExpectedCallsList;
         call1 = new MockCheckedExpectedCall;
@@ -49,7 +49,7 @@ TEST_GROUP(MockExpectedCallsList)
         call2->withName("bar");
         call3->withName("boo");
     }
-    void teardown()
+    void teardown() CPPUTEST_OVERRIDE
     {
         delete call1;
         delete call2;
@@ -57,13 +57,14 @@ TEST_GROUP(MockExpectedCallsList)
         delete call4;
         delete list;
         CHECK_NO_MOCK_FAILURE();
+        MockFailureReporterForTest::clearReporter();
     }
 };
 
 TEST(MockExpectedCallsList, emptyList)
 {
     CHECK(! list->hasUnfulfilledExpectations());
-    CHECK(! list->hasFulfilledExpectations());
+    CHECK(! list->hasFinalizedMatchingExpectations());
     LONGS_EQUAL(0, list->size());
 }
 
@@ -74,7 +75,7 @@ TEST(MockExpectedCallsList, addingCalls)
     LONGS_EQUAL(2, list->size());
 }
 
-TEST(MockExpectedCallsList, listWithFulfilledExpectationHasNoUnfillfilledOnes)
+TEST(MockExpectedCallsList, listWithFulfilledExpectationHasNoUnfulfilledOnes)
 {
     call1->callWasMade(1);
     call2->callWasMade(2);
@@ -112,17 +113,15 @@ TEST(MockExpectedCallsList, deleteAllExpectationsAndClearList)
     list->deleteAllExpectationsAndClearList();
 }
 
-TEST(MockExpectedCallsList, onlyKeepUnfulfilledExpectations)
+TEST(MockExpectedCallsList, onlyKeepUnmatchingExpectations)
 {
     call1->withName("relate");
     call2->withName("unrelate");
-    call3->withName("relate");
-    call2->callWasMade(1);
-    call3->callWasMade(2);
+    call3->withName("relate").withParameter("param",1);
     list->addExpectedCall(call1);
     list->addExpectedCall(call2);
     list->addExpectedCall(call3);
-    list->onlyKeepUnfulfilledExpectations();
+    list->onlyKeepUnmatchingExpectations();
     LONGS_EQUAL(1, list->size());
 }
 
@@ -200,38 +199,42 @@ TEST(MockExpectedCallsList, onlyKeepExpectationsWithInputParameter)
     LONGS_EQUAL(2, list->size());
 }
 
-TEST(MockExpectedCallsList, addUnfilfilledExpectationsWithEmptyList)
+TEST(MockExpectedCallsList, addPotentiallyMatchingExpectationsWithEmptyList)
 {
     MockExpectedCallsList newList;
-    newList.addUnfulfilledExpectations(*list);
+    newList.addPotentiallyMatchingExpectations(*list);
     LONGS_EQUAL(0, newList.size());
 }
 
-TEST(MockExpectedCallsList, addUnfilfilledExpectationsMultipleUnfulfilledExpectations)
+TEST(MockExpectedCallsList, addPotentiallyMatchingExpectationsMultipleUnmatchedExpectations)
 {
     call2->callWasMade(1);
     list->addExpectedCall(call1);
     list->addExpectedCall(call2);
     list->addExpectedCall(call3);
     MockExpectedCallsList newList;
-    newList.addUnfulfilledExpectations(*list);
+    newList.addPotentiallyMatchingExpectations(*list);
     LONGS_EQUAL(2, newList.size());
 }
 
-TEST(MockExpectedCallsList, amountOfExpectationsFor)
+TEST(MockExpectedCallsList, amountOfActualCallsFulfilledFor_HasOneRelated)
 {
     call1->withName("foo");
+    call1->callWasMade(1);
     call2->withName("bar");
+    call2->callWasMade(2);
     list->addExpectedCall(call1);
     list->addExpectedCall(call2);
-    LONGS_EQUAL(1, list->amountOfExpectationsFor("bar"));
+    LONGS_EQUAL(1, list->amountOfActualCallsFulfilledFor("bar"));
 }
 
-TEST(MockExpectedCallsList, amountOfExpectationsForHasNone)
+TEST(MockExpectedCallsList, amountOfActualCallsFulfilledFor_HasNone)
 {
     call1->withName("foo");
+    call1->callWasMade(1);
+    call2->withName("bar");
     list->addExpectedCall(call1);
-    LONGS_EQUAL(0, list->amountOfExpectationsFor("bar"));
+    LONGS_EQUAL(0, list->amountOfActualCallsFulfilledFor("bar"));
 }
 
 TEST(MockExpectedCallsList, callToStringForUnfulfilledFunctions)
@@ -250,6 +253,24 @@ TEST(MockExpectedCallsList, callToStringForUnfulfilledFunctions)
     STRCMP_EQUAL(expectedString.asCharString(), list->unfulfilledCallsToString().asCharString());
 }
 
+TEST(MockExpectedCallsList, callsWithMissingParametersToString)
+{
+    call1->withName("foo").withParameter("boo", 0);
+    call2->withName("bar").withParameter("baa", 10).withParameter("baz", "blah");
+    call2->inputParameterWasPassed("baa");
+
+    list->addExpectedCall(call1);
+    list->addExpectedCall(call2);
+
+    SimpleString expectedString;
+    expectedString = StringFromFormat("-%s\n-#%s\n-%s\n-#%s",
+                                      call1->callToString().asCharString(), 
+                                      call1->missingParametersToString().asCharString(),
+                                      call2->callToString().asCharString(), 
+                                      call2->missingParametersToString().asCharString());
+    STRCMP_EQUAL(expectedString.asCharString(), list->callsWithMissingParametersToString("-", "#").asCharString());
+}
+
 TEST(MockExpectedCallsList, callToStringForFulfilledFunctions)
 {
     call1->withName("foo");
@@ -262,21 +283,72 @@ TEST(MockExpectedCallsList, callToStringForFulfilledFunctions)
     list->addExpectedCall(call2);
 
     SimpleString expectedString;
-    expectedString = StringFromFormat("%s\n%s", call2->callToString().asCharString(), call1->callToString().asCharString());
+    expectedString = StringFromFormat("%s\n%s", call1->callToString().asCharString(), call2->callToString().asCharString());
     STRCMP_EQUAL(expectedString.asCharString(), list->fulfilledCallsToString().asCharString());
 }
 
-TEST(MockExpectedCallsList, removeOneFulfilledExpectationFromEmptyList)
+TEST(MockExpectedCallsList, removeOneFinalizedMatchingExpectationFromEmptyList)
 {
-    POINTERS_EQUAL(NULL, list->removeOneFulfilledExpectation());
+    POINTERS_EQUAL(NULLPTR, list->removeFirstFinalizedMatchingExpectation());
 }
 
-TEST(MockExpectedCallsList, getOneFulfilledExpectationWithIgnoredParametersFromEmptyList)
+TEST(MockExpectedCallsList, getOneMatchingExpectationFromEmptyList)
 {
-    POINTERS_EQUAL(NULL, list->getOneFulfilledExpectationWithIgnoredParameters());
+    POINTERS_EQUAL(NULLPTR, list->getFirstMatchingExpectation());
 }
 
 TEST(MockExpectedCallsList, toStringOnEmptyList)
 {
     STRCMP_EQUAL("<none>", list->unfulfilledCallsToString().asCharString());
+}
+
+TEST(MockExpectedCallsList, hasFinalizedMatchingExpectations_emptyList)
+{
+    CHECK(! list->hasFinalizedMatchingExpectations());
+}
+
+TEST(MockExpectedCallsList, hasFinalizedMatchingExpectations_listHasNonMatchingCalls)
+{
+    call1->withParameter("param", 0);
+    call2->withParameter("param", 0);
+    call3->withParameter("param", 0);
+    list->addExpectedCall(call1);
+    list->addExpectedCall(call2);
+    list->addExpectedCall(call3);
+
+    CHECK(! list->hasFinalizedMatchingExpectations());
+}
+
+TEST(MockExpectedCallsList, hasFinalizedMatchingExpectations_listHasMatchingButNotFinalizedCall)
+{
+    list->addExpectedCall(call1);
+    list->addExpectedCall(call2);
+    call1->ignoreOtherParameters();
+    call2->withParameter("param", 0);
+
+    CHECK(! list->hasFinalizedMatchingExpectations());
+}
+
+TEST(MockExpectedCallsList, hasFinalizedMatchingExpectations_listHasFinalizedCallThatIgnoresParameters)
+{
+    list->addExpectedCall(call1);
+    list->addExpectedCall(call2);
+    call1->ignoreOtherParameters();
+    call2->withParameter("param", 0);
+
+    call1->finalizeActualCallMatch();
+
+    CHECK(list->hasFinalizedMatchingExpectations());
+}
+
+TEST(MockExpectedCallsList, hasFinalizedMatchingExpectations_listHasFinalizedCallThatDoesntIgnoreParameters)
+{
+    list->addExpectedCall(call1);
+    list->addExpectedCall(call2);
+    call1->withParameter("param", 1);
+    call2->withParameter("param", 0);
+
+    call1->inputParameterWasPassed("param");
+
+    CHECK(list->hasFinalizedMatchingExpectations());
 }

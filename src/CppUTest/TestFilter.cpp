@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -28,16 +28,16 @@
 #include "CppUTest/CppUTestConfig.h"
 #include "CppUTest/TestFilter.h"
 
-TestFilter::TestFilter() : strictMatching_(false), invertMatching_(false), next_(NULL)
+TestFilter::TestFilter() : strictMatching_(false), invertMatching_(false), next_(NULLPTR)
 {
 }
 
-TestFilter::TestFilter(const SimpleString& filter) : strictMatching_(false), invertMatching_(false), next_(NULL)
+TestFilter::TestFilter(const SimpleString& filter) : strictMatching_(false), invertMatching_(false), next_(NULLPTR)
 {
     filter_ = filter;
 }
 
-TestFilter::TestFilter(const char* filter) : strictMatching_(false), invertMatching_(false), next_(NULL)
+TestFilter::TestFilter(const char* filter) : strictMatching_(false), invertMatching_(false), next_(NULLPTR)
 {
     filter_ = filter;
 }

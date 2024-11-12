@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -40,7 +40,7 @@ protected:
     MemoryReportFormatter* formatter_;
 public:
     MemoryReportAllocator();
-    virtual ~MemoryReportAllocator();
+    virtual ~MemoryReportAllocator() CPPUTEST_DESTRUCTOR_OVERRIDE;
 
     virtual void setFormatter(MemoryReportFormatter* formatter);
     virtual void setTestResult(TestResult* result);
@@ -48,12 +48,14 @@ public:
 
     virtual TestMemoryAllocator* getRealAllocator();
 
-    virtual char* alloc_memory(size_t size, const char* file, int line) _override;
-    virtual void free_memory(char* memory, const char* file, int line) _override;
+    virtual char* alloc_memory(size_t size, const char* file, size_t line) CPPUTEST_OVERRIDE;
+    virtual void free_memory(char* memory, size_t size, const char* file, size_t line) CPPUTEST_OVERRIDE;
 
-    virtual const char* name() _override;
-    virtual const char* alloc_name() _override;
-    virtual const char* free_name() _override;
+    virtual const char* name() const CPPUTEST_OVERRIDE;
+    virtual const char* alloc_name() const CPPUTEST_OVERRIDE;
+    virtual const char* free_name() const CPPUTEST_OVERRIDE;
+
+    virtual TestMemoryAllocator* actualAllocator() CPPUTEST_OVERRIDE;
 };
 
 #endif

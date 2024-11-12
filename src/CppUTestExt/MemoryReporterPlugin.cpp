@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -31,7 +31,7 @@
 #include "CppUTestExt/CodeMemoryReportFormatter.h"
 
 MemoryReporterPlugin::MemoryReporterPlugin()
-    : TestPlugin("MemoryReporterPlugin"), formatter_(NULL)
+    : TestPlugin("MemoryReporterPlugin"), formatter_(NULLPTR)
 {
 }
 
@@ -41,7 +41,7 @@ MemoryReporterPlugin::~MemoryReporterPlugin()
     destroyMemoryFormatter(formatter_);
 }
 
-bool MemoryReporterPlugin::parseArguments(int /* ac */, const char** av, int index)
+bool MemoryReporterPlugin::parseArguments(int /* ac */, const char *const *av, int index)
 {
     SimpleString argument (av[index]);
     if (argument.contains("-pmemoryreport=")) {
@@ -62,7 +62,7 @@ MemoryReportFormatter* MemoryReporterPlugin::createMemoryFormatter(const SimpleS
     else if (type == "code") {
         return new CodeMemoryReportFormatter(defaultMallocAllocator());
     }
-    return NULL;
+    return NULLPTR;
 }
 
 void MemoryReporterPlugin::destroyMemoryFormatter(MemoryReportFormatter* formatter)
@@ -95,6 +95,20 @@ void MemoryReporterPlugin::removeGlobalMemoryReportAllocators()
         setCurrentMallocAllocator(mallocAllocator.getRealAllocator());
 }
 
+MemoryReportAllocator* MemoryReporterPlugin::getMallocAllocator()
+{
+    return &mallocAllocator;
+}
+
+MemoryReportAllocator* MemoryReporterPlugin::getNewAllocator()
+{
+    return &newAllocator;
+}
+
+MemoryReportAllocator* MemoryReporterPlugin::getNewArrayAllocator()
+{
+    return &newArrayAllocator;
+}
 
 void MemoryReporterPlugin::initializeAllocator(MemoryReportAllocator* allocator, TestResult & result)
 {
@@ -104,7 +118,7 @@ void MemoryReporterPlugin::initializeAllocator(MemoryReportAllocator* allocator,
 
 void MemoryReporterPlugin::preTestAction(UtestShell& test, TestResult& result)
 {
-    if (formatter_ == NULL) return;
+    if (formatter_ == NULLPTR) return;
 
     initializeAllocator(&mallocAllocator, result);
     initializeAllocator(&newAllocator, result);
@@ -122,11 +136,11 @@ void MemoryReporterPlugin::preTestAction(UtestShell& test, TestResult& result)
 
 void MemoryReporterPlugin::postTestAction(UtestShell& test, TestResult& result)
 {
-    if (formatter_ == NULL) return;
+    if (formatter_ == NULLPTR) return;
 
     removeGlobalMemoryReportAllocators();
     formatter_->report_test_end(&result, test);
 
-    if (test.getNext() == NULL || test.getNext()->getGroup() != currentTestGroup_)
+    if (test.getNext() == NULLPTR || test.getNext()->getGroup() != currentTestGroup_)
         formatter_->report_testgroup_end(&result, test);
 }

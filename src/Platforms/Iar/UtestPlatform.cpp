@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -39,6 +39,8 @@
 #undef calloc
 #undef realloc
 #undef free
+#undef strdup
+#undef strndup
 #include "CppUTest/PlatformSpecificFunctions.h"
 
 static jmp_buf test_exit_jmp_buf[10];
@@ -99,13 +101,13 @@ void (*PlatformSpecificRestoreJumpBuffer)() = PlatformSpecificRestoreJumpBufferI
 
 ///////////// Time in millis
 
-static long TimeInMillisImplementation()
+static unsigned long TimeInMillisImplementation()
 {
     clock_t t = clock();
 
     t = t * 10;
 
-    return t;
+    return (unsigned long)t;
 }
 
 ///////////// Time in String
@@ -113,7 +115,10 @@ static long TimeInMillisImplementation()
 static const char* TimeStringImplementation()
 {
     time_t tm = time(NULL);
-    return ctime(&tm);
+    char* pTimeStr = ctime(&tm);
+    char* newlineChar = strchr(pTimeStr, '\n');   // Find the terminating newline character.
+    if(newlineChar != NULL) *newlineChar = '\0';   //If newline is found replace it with the string terminator.
+    return (pTimeStr);
 }
 
 static const char* UTCTimeStringImplementation()
@@ -122,7 +127,7 @@ static const char* UTCTimeStringImplementation()
     return asctime(gmtime(&tm));
 }
 
-long (*GetPlatformSpecificTimeInMillis)() = TimeInMillisImplementation;
+unsigned long (*GetPlatformSpecificTimeInMillis)() = TimeInMillisImplementation;
 const char* (*GetPlatformSpecificTimeString)() = TimeStringImplementation;
 const char* (*GetPlatformSpecificUTCTimeString)() = UTCTimeStringImplementation;
 
@@ -130,15 +135,18 @@ int (*PlatformSpecificVSNprintf)(char *str, size_t size, const char* format, va_
 
 static PlatformSpecificFile PlatformSpecificFOpenImplementation(const char* filename, const char* flag)
 {
+    static int fileNo = 0;
     (void)filename;
     (void)flag;
-    return 0;
+    fileNo++;
+    return (void*)fileNo;
 }
 
 static void PlatformSpecificFPutsImplementation(const char* str, PlatformSpecificFile file)
 {
     (void)str;
     (void)file;
+    printf("FILE%d:%s",(int)file, str);
 }
 
 static void PlatformSpecificFCloseImplementation(PlatformSpecificFile file)
@@ -150,11 +158,11 @@ static void PlatformSpecificFlushImplementation()
 {
 }
 
+PlatformSpecificFile PlatformSpecificStdOut = stdout;
 PlatformSpecificFile (*PlatformSpecificFOpen)(const char*, const char*) = PlatformSpecificFOpenImplementation;
 void (*PlatformSpecificFPuts)(const char*, PlatformSpecificFile) = PlatformSpecificFPutsImplementation;
 void (*PlatformSpecificFClose)(PlatformSpecificFile) = PlatformSpecificFCloseImplementation;
 
-int (*PlatformSpecificPutchar)(int) = putchar;
 void (*PlatformSpecificFlush)() = PlatformSpecificFlushImplementation;
 
 void* (*PlatformSpecificMalloc)(size_t size) = malloc;
@@ -199,5 +207,7 @@ PlatformSpecificMutex (*PlatformSpecificMutexCreate)(void) = DummyMutexCreate;
 void (*PlatformSpecificMutexLock)(PlatformSpecificMutex) = DummyMutexLock;
 void (*PlatformSpecificMutexUnlock)(PlatformSpecificMutex) = DummyMutexUnlock;
 void (*PlatformSpecificMutexDestroy)(PlatformSpecificMutex) = DummyMutexDestroy;
-
+void (*PlatformSpecificSrand)(unsigned int) = srand;
+int (*PlatformSpecificRand)(void) = rand;
+void (*PlatformSpecificAbort)(void) = abort;
 }

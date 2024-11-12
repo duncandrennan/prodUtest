@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -41,10 +41,10 @@ class TestRegistry;
 class CommandLineTestRunner
 {
 public:
-    static int RunAllTests(int ac, const char** av);
+    static int RunAllTests(int ac, const char *const *av);
     static int RunAllTests(int ac, char** av);
 
-    CommandLineTestRunner(int ac, const char** av, TestRegistry* registry);
+    CommandLineTestRunner(int ac, const char *const *av, TestRegistry* registry);
     virtual ~CommandLineTestRunner();
 
     int runAllTestsMain();

@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -30,6 +30,10 @@
 
 TEST_GROUP(MockHierarchyTest)
 {
+    void teardown() CPPUTEST_OVERRIDE
+    {
+        mock().clear();
+    }
 };
 
 TEST(MockHierarchyTest, getMockSupportScope)
@@ -128,7 +132,7 @@ TEST(MockHierarchyTest, checkExpectationsWorksHierarchicallyForLastCallNotFinish
 
     MockExpectedCallsListForTest expectations;
     expectations.addFunction("first::foobar")->withParameter("boo", 1);
-    MockExpectedParameterDidntHappenFailure expectedFailure(mockFailureTest(), "first::foobar", expectations);
+    MockExpectedParameterDidntHappenFailure expectedFailure(mockFailureTest(), "first::foobar", expectations, expectations);
 
     mock("first").expectOneCall("foobar").withParameter("boo", 1);
     mock("first").actualCall("foobar");
@@ -147,4 +151,3 @@ TEST(MockHierarchyTest, reporterIsInheritedInHierarchicalMocks)
     MockUnexpectedCallHappenedFailure expectedFailure(mockFailureTest(), "differentScope::foobar", expectations);
     CHECK_EXPECTED_MOCK_FAILURE(expectedFailure);
 }
-

@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -30,7 +30,7 @@
 
 TEST_GROUP(MockStrictOrderTest)
 {
-  void teardown()
+  void teardown() CPPUTEST_OVERRIDE
   {
     mock().clear();
   }
@@ -66,9 +66,9 @@ TEST(MockStrictOrderTest, orderViolated)
     mock().strictOrder();
 
     MockExpectedCallsListForTest expectations;
-    expectations.addFunction("foo1", 1)->callWasMade(1);
-    expectations.addFunction("foo1", 2)->callWasMade(3);
-    expectations.addFunction("foo2", 3)->callWasMade(2);
+    expectations.addFunctionOrdered("foo1", 1)->callWasMade(1);
+    expectations.addFunctionOrdered("foo1", 2)->callWasMade(3);
+    expectations.addFunctionOrdered("foo2", 3)->callWasMade(2);
     MockCallOrderFailure expectedFailure(mockFailureTest(), expectations);
 
     mock().expectOneCall("foo1");
@@ -89,8 +89,8 @@ TEST(MockStrictOrderTest, orderViolatedWorksHierarchically)
     mock("bla").strictOrder();
 
     MockExpectedCallsListForTest expectations;
-    expectations.addFunction("foo::foo1", 1)->callWasMade(2);
-    expectations.addFunction("foo::foo2", 2)->callWasMade(1);
+    expectations.addFunctionOrdered("foo::foo1", 1)->callWasMade(2);
+    expectations.addFunctionOrdered("foo::foo2", 2)->callWasMade(1);
     MockCallOrderFailure expectedFailure(mockFailureTest(), expectations);
 
     mock("bla").expectOneCall("foo1");
@@ -113,8 +113,8 @@ TEST(MockStrictOrderTest, orderViolatedWorksWithExtraUnexpectedCall)
 	mock().ignoreOtherCalls();
 
     MockExpectedCallsListForTest expectations;
-    expectations.addFunction("foo::foo1", 1)->callWasMade(2);
-    expectations.addFunction("foo::foo2", 2)->callWasMade(1);
+    expectations.addFunctionOrdered("foo::foo1", 1)->callWasMade(2);
+    expectations.addFunctionOrdered("foo::foo2", 2)->callWasMade(1);
     MockCallOrderFailure expectedFailure(mockFailureTest(), expectations);
 
     mock("bla").expectOneCall("foo1");
@@ -137,8 +137,8 @@ TEST(MockStrictOrderTest, orderViolatedWithinAScope)
     mock().strictOrder();
 
     MockExpectedCallsListForTest expectations;
-    expectations.addFunction("scope::foo1", 1)->callWasMade(2);
-    expectations.addFunction("scope::foo2", 2)->callWasMade(1);
+    expectations.addFunctionOrdered("scope::foo1", 1)->callWasMade(2);
+    expectations.addFunctionOrdered("scope::foo2", 2)->callWasMade(1);
     MockCallOrderFailure expectedFailure(mockFailureTest(), expectations);
 
     mock("scope").expectOneCall("foo1");
@@ -185,11 +185,15 @@ TEST(MockStrictOrderTest, orderUsingNCalls)
     mock().expectOneCall("foo1");
     mock().expectNCalls(2, "foo2");
     mock().expectOneCall("foo1");
+    mock().expectNCalls(3, "foo2");
+
     mock().actualCall("foo1");
     mock().actualCall("foo2");
     mock().actualCall("foo2");
     mock().actualCall("foo1");
+    mock().actualCall("foo2");
+    mock().actualCall("foo2");
+    mock().actualCall("foo2");
 
     mock().checkExpectations();
 }
-

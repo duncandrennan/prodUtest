@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -39,6 +39,8 @@
 #undef calloc
 #undef realloc
 #undef free
+#undef strdup
+#undef strndup
 
 #define  far  // eliminate "meaningless type qualifier" warning
 
@@ -105,10 +107,10 @@ void (*PlatformSpecificRestoreJumpBuffer)() = PlatformSpecificRestoreJumpBufferI
 *  In Keil MDK-ARM, clock() default implementation used semihosting.
 *  Resolutions is user adjustable (1 ms for now)
 */
-static long TimeInMillisImplementation()
+static unsigned long TimeInMillisImplementation()
 {
     clock_t t = clock();
-    return t;
+    return (unsigned long)t;
 }
 
 ///////////// Time in String
@@ -119,7 +121,7 @@ static const char* DummyTimeStringImplementation()
     return ctime(&tm);
 }
 
-long (*GetPlatformSpecificTimeInMillis)() = TimeInMillisImplementation;
+unsigned long (*GetPlatformSpecificTimeInMillis)() = TimeInMillisImplementation;
 const char* (*GetPlatformSpecificTimeString)() = DummyTimeStringImplementation;
 const char* (*GetPlatformSpecificUTCTimeString)() = DummyTimeStringImplementation;
 
@@ -145,11 +147,11 @@ static void PlatformSpecificFlushImplementation()
     fflush(stdout);
 }
 
+PlatformSpecificFile PlatformSpecificStdOut = stdout;
 PlatformSpecificFile (*PlatformSpecificFOpen)(const char*, const char*) = PlatformSpecificFOpenImplementation;
 void (*PlatformSpecificFPuts)(const char*, PlatformSpecificFile) = PlatformSpecificFPutsImplementation;
 void (*PlatformSpecificFClose)(PlatformSpecificFile) = PlatformSpecificFCloseImplementation;
 
-int (*PlatformSpecificPutchar)(int) = putchar;
 void (*PlatformSpecificFlush)() = PlatformSpecificFlushImplementation;
 
 void* (*PlatformSpecificMalloc)(size_t size) = malloc;
@@ -157,6 +159,9 @@ void* (*PlatformSpecificRealloc)(void*, size_t) = realloc;
 void (*PlatformSpecificFree)(void* memory) = free;
 void* (*PlatformSpecificMemCpy)(void*, const void*, size_t) = memcpy;
 void* (*PlatformSpecificMemset)(void*, int, size_t) = memset;
+
+void (*PlatformSpecificSrand)(unsigned int) = srand;
+int (*PlatformSpecificRand)(void) = rand;
 
 static int IsNanImplementation(double d)
 {
@@ -199,5 +204,6 @@ PlatformSpecificMutex (*PlatformSpecificMutexCreate)(void) = DummyMutexCreate;
 void (*PlatformSpecificMutexLock)(PlatformSpecificMutex) = DummyMutexLock;
 void (*PlatformSpecificMutexUnlock)(PlatformSpecificMutex) = DummyMutexUnlock;
 void (*PlatformSpecificMutexDestroy)(PlatformSpecificMutex) = DummyMutexDestroy;
+void (*PlatformSpecificAbort)(void) = abort;
 
 }

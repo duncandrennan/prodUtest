@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -29,10 +29,10 @@
 #include "CppUTest/TestRegistry.h"
 #include "CppUTestExt/OrderedTest.h"
 
-OrderedTestShell* OrderedTestShell::_orderedTestsHead = 0;
+OrderedTestShell* OrderedTestShell::_orderedTestsHead = NULLPTR;
 
 OrderedTestShell::OrderedTestShell() :
-    _nextOrderedTest(0), _level(0)
+    _nextOrderedTest(NULLPTR), _level(0)
 {
 }
 
@@ -62,7 +62,7 @@ OrderedTestShell* OrderedTestShell::getOrderedTestHead()
 
 bool OrderedTestShell::firstOrderedTest()
 {
-    return (getOrderedTestHead() == 0);
+    return (getOrderedTestHead() == NULLPTR);
 }
 
 OrderedTestShell* OrderedTestShell::addOrderedTest(OrderedTestShell* test)
@@ -77,7 +77,7 @@ void OrderedTestShell::addOrderedTestToHead(OrderedTestShell* test)
     TestRegistry *reg = TestRegistry::getCurrentRegistry();
     UtestShell* head = getOrderedTestHead();
 
-    if (NULL == reg->getFirstTest() || head == reg->getFirstTest()) {
+    if (NULLPTR == reg->getFirstTest() || head == reg->getFirstTest()) {
         reg->addTest(test);
     }
     else {
@@ -96,7 +96,7 @@ OrderedTestShell* OrderedTestShell::getNextOrderedTest()
 
 OrderedTestInstaller::OrderedTestInstaller(OrderedTestShell& test,
         const char* groupName, const char* testName, const char* fileName,
-        int lineNumber, int level)
+        size_t lineNumber, int level)
 {
     test.setTestName(testName);
     test.setGroupName(groupName);

@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -30,8 +30,8 @@
 #include "CppUTestExt/MemoryReportAllocator.h"
 #include "CppUTestExt/CodeMemoryReportFormatter.h"
 
-#define TESTOUTPUT_EQUAL(a) STRCMP_EQUAL_LOCATION(a, testOutput.getOutput().asCharString(), "", __FILE__, __LINE__);
-#define TESTOUTPUT_CONTAINS(a) STRCMP_CONTAINS_LOCATION(a, testOutput.getOutput().asCharString(), "", __FILE__, __LINE__);
+#define TESTOUTPUT_EQUAL(a) STRCMP_EQUAL_LOCATION(a, testOutput.getOutput().asCharString(), "", __FILE__, __LINE__)
+#define TESTOUTPUT_CONTAINS(a) STRCMP_CONTAINS_LOCATION(a, testOutput.getOutput().asCharString(), "", __FILE__, __LINE__)
 
 TEST_GROUP(CodeMemoryReportFormatter)
 {
@@ -45,7 +45,7 @@ TEST_GROUP(CodeMemoryReportFormatter)
     TestResult* testResult;
     CodeMemoryReportFormatter* formatter;
 
-    void setup()
+    void setup() CPPUTEST_OVERRIDE
     {
         cAllocator = defaultMallocAllocator();
         newAllocator = defaultNewAllocator();
@@ -57,7 +57,7 @@ TEST_GROUP(CodeMemoryReportFormatter)
         testResult = new TestResult(testOutput);
     }
 
-    void teardown()
+    void teardown() CPPUTEST_OVERRIDE
     {
         delete testResult;
         delete formatter;
@@ -124,7 +124,7 @@ TEST(CodeMemoryReportFormatter, NewAllocatorGeneratesDeleteCode)
 
 TEST(CodeMemoryReportFormatter, DeleteNullWorksFine)
 {
-    formatter->report_free_memory(testResult, newAllocator, NULL, "boo", 4);
+    formatter->report_free_memory(testResult, newAllocator, NULLPTR, "boo", 4);
     TESTOUTPUT_CONTAINS("delete [] NULL; /* using delete at boo:4 */");
 }
 

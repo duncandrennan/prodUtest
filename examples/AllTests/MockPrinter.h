@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -40,22 +40,18 @@
 #include <stdlib.h>
 #include <string>
 
-class MockPrinter: public Printer
+class MockPrinter : public Printer
 {
 public:
-    explicit MockPrinter()
-    {
-    }
-    virtual ~MockPrinter()
-    {
-    }
+    explicit MockPrinter() {}
+    virtual ~MockPrinter() CPPUTEST_DESTRUCTOR_OVERRIDE {}
 
-    virtual void Print(const char* s)
+    virtual void Print(const char* s) CPPUTEST_OVERRIDE
     {
         savedOutput.append(s);
     }
 
-    virtual void Print(long int value)
+    virtual void Print(long int value) CPPUTEST_OVERRIDE
     {
         SimpleString buffer;
         buffer = StringFromFormat("%ld", value);
@@ -68,12 +64,10 @@ public:
     }
 
 private:
-
     std::string savedOutput;
 
     MockPrinter(const MockPrinter&);
     MockPrinter& operator=(const MockPrinter&);
-
 };
 
-#endif  // D_MockPrinter_H
+#endif // D_MockPrinter_H

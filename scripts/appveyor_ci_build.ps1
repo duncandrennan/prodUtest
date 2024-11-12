@@ -2,6 +2,8 @@
 # Load functions from the helper file
 . (Join-Path (Split-Path $MyInvocation.MyCommand.Path) 'appveyor_helpers.ps1')
 
+mkdir cpputest_build
+
 function Invoke-BuildCommand($command, $directory = '.')
 {
     $command_wrapped = "$command;`$err = `$?"
@@ -27,7 +29,7 @@ function Invoke-CygwinCommand($command, $directory = '.')
 
     $cygwin_directory = (. "${cygwin_bin}\cygpath.exe" (Resolve-Path $directory))
     $command_wrapped = "${cygwin_bin}\bash.exe --login -c 'cd $cygwin_directory ; $command'"
-    
+
     Write-Host "Executing <$command> in <$cygwin_directory>"
     Invoke-Expression $command_wrapped
 
@@ -73,10 +75,18 @@ switch -Wildcard ($env:Platform)
     {
         $mingw_path = Get-MinGWBin
 
+        if ($env:Platform -like 'MinGWClang*')
+        {
+            $toolchain_filename = Get-ClangToolchainFilename
+            $toolchain_path = (Join-Path (Split-Path $MyInvocation.MyCommand.Path) "..\cmake\Toolchains\$toolchain_filename")
+            $toolchain = "-DCMAKE_TOOLCHAIN_FILE=$toolchain_path -DCPPUTEST_WERROR=OFF"
+        }
+
         # Add mingw to the path
         Add-PathFolder $mingw_path
 
-        Invoke-BuildCommand "cmake -G 'MinGW Makefiles' .." 'cpputest_build'
+        Invoke-BuildCommand "cmake --version"
+        Invoke-BuildCommand "cmake -G 'MinGW Makefiles' -DCMAKE_CXX_STANDARD=17 $toolchain .." 'cpputest_build'
         Invoke-BuildCommand "mingw32-make all" 'cpputest_build'
 
         Remove-PathFolder $mingw_path

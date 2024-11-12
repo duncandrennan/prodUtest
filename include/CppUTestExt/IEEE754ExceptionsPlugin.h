@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -35,8 +35,8 @@ class IEEE754ExceptionsPlugin: public TestPlugin
 public:
     IEEE754ExceptionsPlugin(const SimpleString& name = "IEEE754ExceptionsPlugin");
 
-    virtual void preTestAction(UtestShell& test, TestResult& result) _override;
-    virtual void postTestAction(UtestShell& test, TestResult& result) _override;
+    virtual void preTestAction(UtestShell& test, TestResult& result) CPPUTEST_OVERRIDE;
+    virtual void postTestAction(UtestShell& test, TestResult& result) CPPUTEST_OVERRIDE;
 
     static void disableInexact(void);
     static void enableInexact(void);

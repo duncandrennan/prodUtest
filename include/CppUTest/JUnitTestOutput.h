@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -38,21 +38,22 @@ class JUnitTestOutput: public TestOutput
 {
 public:
     JUnitTestOutput();
-    virtual ~JUnitTestOutput();
+    virtual ~JUnitTestOutput() CPPUTEST_DESTRUCTOR_OVERRIDE;
 
-    virtual void printTestsStarted() _override;
-    virtual void printTestsEnded(const TestResult& result) _override;
-    virtual void printCurrentTestStarted(const UtestShell& test) _override;
-    virtual void printCurrentTestEnded(const TestResult& res) _override;
-    virtual void printCurrentGroupStarted(const UtestShell& test) _override;
-    virtual void printCurrentGroupEnded(const TestResult& res) _override;
+    virtual void printTestsStarted() CPPUTEST_OVERRIDE;
+    virtual void printTestsEnded(const TestResult& result) CPPUTEST_OVERRIDE;
+    virtual void printCurrentTestStarted(const UtestShell& test) CPPUTEST_OVERRIDE;
+    virtual void printCurrentTestEnded(const TestResult& res) CPPUTEST_OVERRIDE;
+    virtual void printCurrentGroupStarted(const UtestShell& test) CPPUTEST_OVERRIDE;
+    virtual void printCurrentGroupEnded(const TestResult& res) CPPUTEST_OVERRIDE;
 
-    virtual void printBuffer(const char*) _override;
-    virtual void print(const char*) _override;
-    virtual void print(long) _override;
-    virtual void printFailure(const TestFailure& failure) _override;
+    virtual void printBuffer(const char*) CPPUTEST_OVERRIDE;
+    virtual void print(const char*) CPPUTEST_OVERRIDE;
+    virtual void print(long) CPPUTEST_OVERRIDE;
+    virtual void print(size_t) CPPUTEST_OVERRIDE;
+    virtual void printFailure(const TestFailure& failure) CPPUTEST_OVERRIDE;
 
-    virtual void flush() _override;
+    virtual void flush() CPPUTEST_OVERRIDE;
 
     virtual SimpleString createFileName(const SimpleString& group);
     void setPackageName(const SimpleString &package);
@@ -71,9 +72,10 @@ protected:
     virtual void writeTestSuiteSummary();
     virtual void writeProperties();
     virtual void writeTestCases();
+    virtual SimpleString encodeXmlText(const SimpleString& textbody);
+    virtual SimpleString encodeFileName(const SimpleString& fileName);
     virtual void writeFailure(JUnitTestCaseResultNode* node);
     virtual void writeFileEnding();
-
 };
 
 #endif

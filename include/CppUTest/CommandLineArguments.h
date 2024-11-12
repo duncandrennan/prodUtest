@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -38,17 +38,25 @@ class TestPlugin;
 class CommandLineArguments
 {
 public:
-    explicit CommandLineArguments(int ac, const char** av);
+    explicit CommandLineArguments(int ac, const char *const *av);
     virtual ~CommandLineArguments();
 
     bool parse(TestPlugin* plugin);
+    bool needHelp() const;
     bool isVerbose() const;
+    bool isVeryVerbose() const;
     bool isColor() const;
     bool isListingTestGroupNames() const;
     bool isListingTestGroupAndCaseNames() const;
+    bool isListingTestLocations() const;
     bool isRunIgnored() const;
-    int getRepeatCount() const;
     const TestDefine* getTestDefines() const;
+    size_t getRepeatCount() const;
+    bool isShuffling() const;
+    bool isReversing() const;
+    bool isCrashingOnFail() const;
+    bool isRethrowingExceptions() const;
+    size_t getShuffleSeed() const;
     const TestFilter* getGroupFilters() const;
     const TestFilter* getNameFilters() const;
     bool isJUnitOutput() const;
@@ -58,6 +66,7 @@ public:
     bool runTestsInSeperateProcess() const;
     const SimpleString& getPackageName() const;
     const char* usage() const;
+    const char* help() const;
 
 private:
 
@@ -65,36 +74,48 @@ private:
     {
         OUTPUT_ECLIPSE, OUTPUT_JUNIT, OUTPUT_TEAMCITY, OUTPUT_PRODUTEST
     };
-    int ac_;
-    const char** av_;
 
+    int ac_;
+    const char *const *av_;
+
+    bool needHelp_;
     bool verbose_;
+    bool veryVerbose_;
     bool color_;
     bool runTestsAsSeperateProcess_;
     bool listTestGroupNames_;
     bool listTestGroupAndCaseNames_;
+    bool listTestLocations_;
     bool runIgnored_;
-    int repeat_;
     TestDefine* testDefines_;
+    bool reversing_;
+    bool crashOnFail_;
+    bool rethrowExceptions_;
+    bool shuffling_;
+    bool shufflingPreSeeded_;
+    size_t repeat_;
+    size_t shuffleSeed_;
     TestFilter* groupFilters_;
     TestFilter* nameFilters_;
     OutputType outputType_;
     SimpleString packageName_;
 
-    SimpleString getParameterField(int ac, const char** av, int& i, const SimpleString& parameterName);
-    void SetRepeatCount(int ac, const char** av, int& index);
-    void AddDefine(int ac, const char** av, int& index);
-    void AddGroupFilter(int ac, const char** av, int& index);
-    void AddStrictGroupFilter(int ac, const char** av, int& index);
-    void AddExcludeGroupFilter(int ac, const char** av, int& index);
-    void AddExcludeStrictGroupFilter(int ac, const char** av, int& index);
-    void AddNameFilter(int ac, const char** av, int& index);
-    void AddStrictNameFilter(int ac, const char** av, int& index);
-    void AddExcludeNameFilter(int ac, const char** av, int& index);
-    void AddExcludeStrictNameFilter(int ac, const char** av, int& index);
-    void AddTestToRunBasedOnVerboseOutput(int ac, const char** av, int& index, const char* parameterName);
-    bool SetOutputType(int ac, const char** av, int& index);
-    void SetPackageName(int ac, const char** av, int& index);
+    SimpleString getParameterField(int ac, const char *const *av, int& i, const SimpleString& parameterName);
+    void setRepeatCount(int ac, const char *const *av, int& index);
+    bool setShuffle(int ac, const char *const *av, int& index);
+    void addGroupFilter(int ac, const char *const *av, int& index);
+    bool addGroupDotNameFilter(int ac, const char *const *av, int& index, const SimpleString& parameterName, bool strict, bool exclude);
+    void addStrictGroupFilter(int ac, const char *const *av, int& index);
+    void addExcludeGroupFilter(int ac, const char *const *av, int& index);
+    void addExcludeStrictGroupFilter(int ac, const char *const *av, int& index);
+    void addNameFilter(int ac, const char *const *av, int& index);
+    void addStrictNameFilter(int ac, const char *const *av, int& index);
+    void addExcludeNameFilter(int ac, const char *const *av, int& index);
+    void addExcludeStrictNameFilter(int ac, const char *const *av, int& index);
+    void addTestToRunBasedOnVerboseOutput(int ac, const char *const *av, int& index, const char* parameterName);
+    bool setOutputType(int ac, const char *const *av, int& index);
+    void setPackageName(int ac, const char *const *av, int& index);
+    void addDefine(int ac, const char** av, int& index);
 
     CommandLineArguments(const CommandLineArguments&);
     CommandLineArguments& operator=(const CommandLineArguments&);

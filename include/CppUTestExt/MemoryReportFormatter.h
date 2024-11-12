@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -42,24 +42,24 @@ public:
     virtual void report_test_start(TestResult* result, UtestShell& test)=0;
     virtual void report_test_end(TestResult* result, UtestShell& test)=0;
 
-    virtual void report_alloc_memory(TestResult* result, TestMemoryAllocator* allocator, size_t size, char* memory, const char* file, int line)=0;
-    virtual void report_free_memory(TestResult* result, TestMemoryAllocator* allocator, char* memory, const char* file, int line)=0;
+    virtual void report_alloc_memory(TestResult* result, TestMemoryAllocator* allocator, size_t size, char* memory, const char* file, size_t line)=0;
+    virtual void report_free_memory(TestResult* result, TestMemoryAllocator* allocator, char* memory, const char* file, size_t line)=0;
 };
 
 class NormalMemoryReportFormatter : public MemoryReportFormatter
 {
 public:
     NormalMemoryReportFormatter();
-    virtual ~NormalMemoryReportFormatter();
+    virtual ~NormalMemoryReportFormatter() CPPUTEST_DESTRUCTOR_OVERRIDE;
 
-    virtual void report_testgroup_start(TestResult* /*result*/, UtestShell& /*test*/) _override;
-    virtual void report_testgroup_end(TestResult* /*result*/, UtestShell& /*test*/) _override {} // LCOV_EXCL_LINE
+    virtual void report_testgroup_start(TestResult* /*result*/, UtestShell& /*test*/) CPPUTEST_OVERRIDE;
+    virtual void report_testgroup_end(TestResult* /*result*/, UtestShell& /*test*/) CPPUTEST_OVERRIDE {} // LCOV_EXCL_LINE
 
-    virtual void report_test_start(TestResult* result, UtestShell& test) _override;
-    virtual void report_test_end(TestResult* result, UtestShell& test) _override;
+    virtual void report_test_start(TestResult* result, UtestShell& test) CPPUTEST_OVERRIDE;
+    virtual void report_test_end(TestResult* result, UtestShell& test) CPPUTEST_OVERRIDE;
 
-    virtual void report_alloc_memory(TestResult* result, TestMemoryAllocator* allocator, size_t size, char* memory, const char* file, int line) _override;
-    virtual void report_free_memory(TestResult* result, TestMemoryAllocator* allocator, char* memory, const char* file, int line) _override;
+    virtual void report_alloc_memory(TestResult* result, TestMemoryAllocator* allocator, size_t size, char* memory, const char* file, size_t line) CPPUTEST_OVERRIDE;
+    virtual void report_free_memory(TestResult* result, TestMemoryAllocator* allocator, char* memory, const char* file, size_t line) CPPUTEST_OVERRIDE;
 };
 
 #endif

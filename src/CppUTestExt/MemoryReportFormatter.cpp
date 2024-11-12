@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -47,14 +47,14 @@ void NormalMemoryReportFormatter::report_test_end(TestResult* result, UtestShell
     result->print(StringFromFormat("ENDTEST(%s, %s)\n", test.getGroup().asCharString(), test.getName().asCharString()).asCharString());
 }
 
-void NormalMemoryReportFormatter::report_alloc_memory(TestResult* result, TestMemoryAllocator* allocator, size_t size, char* memory, const char* file, int line)
+void NormalMemoryReportFormatter::report_alloc_memory(TestResult* result, TestMemoryAllocator* allocator, size_t size, char* memory, const char* file, size_t line)
 {
-    result->print(StringFromFormat("\tAllocation using %s of size: %lu pointer: %p at %s:%d\n", allocator->alloc_name(), (unsigned long) size, (void*) memory, file, line).asCharString());
+    result->print(StringFromFormat("\tAllocation using %s of size: %lu pointer: %p at %s:%d\n", allocator->alloc_name(), (unsigned long) size, (void*) memory, file, (int) line).asCharString());
 }
 
-void NormalMemoryReportFormatter::report_free_memory(TestResult* result, TestMemoryAllocator* allocator, char* memory, const char* file, int line)
+void NormalMemoryReportFormatter::report_free_memory(TestResult* result, TestMemoryAllocator* allocator, char* memory, const char* file, size_t line)
 {
-    result->print(StringFromFormat("\tDeallocation using %s of pointer: %p at %s:%d\n", allocator->free_name(),  (void*) memory, file, line).asCharString());
+    result->print(StringFromFormat("\tDeallocation using %s of pointer: %p at %s:%d\n", allocator->free_name(),  (void*) memory, file, (int) line).asCharString());
 }
 
 void NormalMemoryReportFormatter::report_testgroup_start(TestResult* result, UtestShell& test)

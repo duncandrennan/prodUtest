@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -25,9 +25,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef IEEE754PLUGINTEST_C_H
+#define IEEE754PLUGINTEST_C_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void set_divisionbyzero_c(void);
 void set_overflow_c(void);
 void set_underflow_c(void);
 void set_inexact_c(void);
 void set_nothing_c(void);
 void set_everything_c(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* IEEE754PLUGINTEST_C_H */

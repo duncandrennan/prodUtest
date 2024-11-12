@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -33,6 +33,7 @@
 #ifndef D_TestRegistry_h
 #define D_TestRegistry_h
 
+#include "StandardCLibrary.h"
 #include "SimpleString.h"
 #include "TestFilter.h"
 #include "TestDefine.h"
@@ -49,11 +50,14 @@ public:
 
     virtual void addTest(UtestShell *test);
     virtual void unDoLastAddTest();
-    virtual int countTests();
+    virtual size_t countTests();
     virtual void runAllTests(TestResult& result);
+    virtual void shuffleTests(size_t seed);
+    virtual void reverseTests();
     virtual void listTestGroupNames(TestResult& result);
     virtual void listTestGroupAndCaseNames(TestResult& result);
     virtual void setTestDefines(const TestDefine* defines);
+    virtual void listTestLocations(TestResult& result);
     virtual void setNameFilters(const TestFilter* filters);
     virtual void setGroupFilters(const TestFilter* filters);
     virtual void installPlugin(TestPlugin* plugin);
@@ -75,6 +79,7 @@ public:
     virtual void setRunTestsInSeperateProcess();
     int getCurrentRepetition();
     void setRunIgnored();
+
 private:
 
     bool testShouldRun(UtestShell* test, TestResult& result);

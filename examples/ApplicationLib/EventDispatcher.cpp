@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -28,9 +28,7 @@
 #include "EventDispatcher.h"
 using namespace std;
 
-EventDispatcher::EventDispatcher()
-{
-}
+EventDispatcher::EventDispatcher() {}
 
 void EventDispatcher::registerObserver(EventType type, EventObserver* observer)
 {
@@ -42,8 +40,7 @@ void EventDispatcher::registerObserver(EventType type, EventObserver* observer)
 
 void EventDispatcher::dispatchEvent(const Event& event, int timeoutSeconds)
 {
-    for (list<pair<EventType, EventObserver*> >::iterator i = observerList_.begin(); i != observerList_.end(); i++)
-    {
+    for (list<pair<EventType, EventObserver*> >::iterator i = observerList_.begin(); i != observerList_.end(); i++) {
         if (i->first == event.type)
             i->second->notify(event, timeoutSeconds);
     }

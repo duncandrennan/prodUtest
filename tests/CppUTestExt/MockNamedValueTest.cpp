@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -37,10 +37,10 @@ class MyComparator : public MockNamedValueComparator
   public:
 
     MyComparator() {}
-    virtual ~MyComparator() {}
+    virtual ~MyComparator() CPPUTEST_DESTRUCTOR_OVERRIDE {}
 
-    virtual bool isEqual(const void*, const void*) _override { return false; }
-    virtual SimpleString valueToString(const void*) _override { return ""; }
+    virtual bool isEqual(const void*, const void*) CPPUTEST_OVERRIDE { return false; }
+    virtual SimpleString valueToString(const void*) CPPUTEST_OVERRIDE { return ""; }
 };
 
 class MyCopier : public MockNamedValueCopier
@@ -48,9 +48,9 @@ class MyCopier : public MockNamedValueCopier
   public:
 
     MyCopier() {}
-    virtual ~MyCopier() {}
+    virtual ~MyCopier() CPPUTEST_DESTRUCTOR_OVERRIDE {}
 
-    virtual void copy(void*, const void*) _override {}
+    virtual void copy(void*, const void*) CPPUTEST_OVERRIDE {}
 };
 
 TEST(ComparatorsAndCopiersRepository, InstallCopierAndRetrieveIt)
@@ -74,3 +74,68 @@ TEST(ComparatorsAndCopiersRepository, ComparatorAndCopierByTheSameNameShouldBoth
   repository.clear();
 }
 
+TEST(ComparatorsAndCopiersRepository, InstallComparatorsAndCopiersFromRepository)
+{
+  MyComparator comparator;
+  MyCopier copier;
+  MockNamedValueComparatorsAndCopiersRepository source;
+  MockNamedValueComparatorsAndCopiersRepository target;
+
+  source.installCopier("MyType", copier);
+  source.installComparator("MyType", comparator);
+
+  target.installComparatorsAndCopiers(source);
+
+  POINTERS_EQUAL(&comparator, target.getComparatorForType("MyType"));
+  POINTERS_EQUAL(&copier, target.getCopierForType("MyType"));
+
+  source.clear();
+  target.clear();
+}
+
+TEST_GROUP(MockNamedValue)
+{
+  MockNamedValue * value;
+  void setup() CPPUTEST_OVERRIDE
+  {
+    value = new MockNamedValue("param");
+  }
+
+  void teardown() CPPUTEST_OVERRIDE
+  {
+    delete value;
+  }
+};
+
+TEST(MockNamedValue, DefaultToleranceUsedWhenNoToleranceGiven)
+{
+  value->setValue(0.2);
+  DOUBLES_EQUAL(MockNamedValue::defaultDoubleTolerance, value->getDoubleTolerance(), 0.0);
+}
+
+TEST(MockNamedValue, GivenToleranceUsed)
+{
+  value->setValue(0.2, 3.2);
+  STRCMP_EQUAL("double", value->getType().asCharString());
+  DOUBLES_EQUAL(0.2, value->getDoubleValue(), 0.0);
+  DOUBLES_EQUAL(3.2, value->getDoubleTolerance(), 0.0);
+}
+
+TEST(MockNamedValue, DoublesEqualIfWithinTolerance)
+{
+  value->setValue(5.0, 0.4);
+  MockNamedValue other("param2");
+  other.setValue(5.3);
+
+  CHECK_TRUE(value->equals(other));
+}
+
+
+TEST(MockNamedValue, DoublesNotEqualIfOutsideTolerance)
+{
+  value->setValue(5.0, 0.4);
+  MockNamedValue other("param2");
+  other.setValue(5.5);
+
+  CHECK_FALSE(value->equals(other));
+}

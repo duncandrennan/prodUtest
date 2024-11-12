@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -28,7 +28,7 @@
 #include "CppUTest/TestHarness.h"
 #include "CppUTestExt/IEEE754ExceptionsPlugin.h"
 
-#ifdef CPPUTEST_HAVE_FENV
+#if CPPUTEST_HAVE_FENV
 
 extern "C" {
     #include <fenv.h>
@@ -98,6 +98,56 @@ void IEEE754ExceptionsPlugin::ieee754Check(UtestShell& test, TestResult& result,
         CheckFailure failure(&test, __FILE__, __LINE__, "IEEE754_CHECK_CLEAR", text);
         result.addFailure(failure);
     }
+}
+
+#else
+
+
+bool IEEE754ExceptionsPlugin::inexactDisabled_ = true;
+
+IEEE754ExceptionsPlugin::IEEE754ExceptionsPlugin(const SimpleString& name)
+    : TestPlugin(name)
+{
+}
+
+void IEEE754ExceptionsPlugin::preTestAction(UtestShell&, TestResult&)
+{
+}
+
+void IEEE754ExceptionsPlugin::postTestAction(UtestShell&, TestResult&)
+{
+}
+
+void IEEE754ExceptionsPlugin::disableInexact()
+{
+}
+
+void IEEE754ExceptionsPlugin::enableInexact()
+{
+}
+
+bool IEEE754ExceptionsPlugin::checkIeee754OverflowExceptionFlag()
+{
+    return false;
+}
+
+bool IEEE754ExceptionsPlugin::checkIeee754UnderflowExceptionFlag()
+{
+    return false;
+}
+
+bool IEEE754ExceptionsPlugin::checkIeee754InexactExceptionFlag()
+{
+    return false;
+}
+
+bool IEEE754ExceptionsPlugin::checkIeee754DivByZeroExceptionFlag()
+{
+    return false;
+}
+
+void IEEE754ExceptionsPlugin::ieee754Check(UtestShell&, TestResult&, int, const char*)
+{
 }
 
 #endif

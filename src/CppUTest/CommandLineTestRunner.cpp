@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -35,10 +35,10 @@
 
 int CommandLineTestRunner::RunAllTests(int ac, char** av)
 {
-    return RunAllTests(ac, (const char**) av);
+    return RunAllTests(ac, (const char *const *) av);
 }
 
-int CommandLineTestRunner::RunAllTests(int ac, const char** av)
+int CommandLineTestRunner::RunAllTests(int ac, const char *const *av)
 {
     int result = 0;
     ConsoleTestOutput backupOutput;
@@ -59,8 +59,8 @@ int CommandLineTestRunner::RunAllTests(int ac, const char** av)
     return result;
 }
 
-CommandLineTestRunner::CommandLineTestRunner(int ac, const char** av, TestRegistry* registry) :
-    output_(NULL), arguments_(NULL), registry_(registry)
+CommandLineTestRunner::CommandLineTestRunner(int ac, const char *const *av, TestRegistry* registry) :
+    output_(NULLPTR), arguments_(NULLPTR), registry_(registry)
 {
     arguments_ = new CommandLineArguments(ac, av);
 }
@@ -73,7 +73,7 @@ CommandLineTestRunner::~CommandLineTestRunner()
 
 int CommandLineTestRunner::runAllTestsMain()
 {
-    int testResult = 0;
+    int testResult = 1;
 
     SetPointerPlugin pPlugin(DEF_PLUGIN_SET_POINTER);
     registry_->installPlugin(&pPlugin);
@@ -90,19 +90,24 @@ void CommandLineTestRunner::initializeTestRun()
     registry_->setTestDefines(arguments_->getTestDefines());
     registry_->setGroupFilters(arguments_->getGroupFilters());
     registry_->setNameFilters(arguments_->getNameFilters());
-	
-    if (arguments_->isVerbose()) output_->verbose();
+
+    if (arguments_->isVerbose()) output_->verbose(TestOutput::level_verbose);
+    if (arguments_->isVeryVerbose()) output_->verbose(TestOutput::level_veryVerbose);
     if (arguments_->isColor()) output_->color();
     if (arguments_->runTestsInSeperateProcess()) registry_->setRunTestsInSeperateProcess();
     if (arguments_->isRunIgnored()) registry_->setRunIgnored();
+    if (arguments_->isCrashingOnFail()) UtestShell::setCrashOnFail();
+
+    UtestShell::setRethrowExceptions( arguments_->isRethrowingExceptions() );
 }
 
 int CommandLineTestRunner::runAllTests()
 {
     initializeTestRun();
-    int loopCount = 0;
-    int failureCount = 0;
-    int repeat_ = arguments_->getRepeatCount();
+    size_t loopCount = 0;
+    size_t failedTestCount = 0;
+    size_t failedExecutionCount = 0;
+    size_t repeatCount = arguments_->getRepeatCount();
 
     if (arguments_->isListingTestGroupNames())
     {
@@ -118,14 +123,36 @@ int CommandLineTestRunner::runAllTests()
         return 0;
     }
 
-    while (loopCount++ < repeat_) {
-        output_->printTestRun(loopCount, repeat_);
+    if (arguments_->isListingTestLocations())
+    {
         TestResult tr(*output_);
-        registry_->runAllTests(tr);
-        failureCount += tr.getFailureCount();
+        registry_->listTestLocations(tr);
+        return 0;
     }
 
-    return failureCount;
+    if (arguments_->isReversing())
+        registry_->reverseTests();
+
+    if (arguments_->isShuffling())
+    {
+        output_->print("Test order shuffling enabled with seed: ");
+        output_->print(arguments_->getShuffleSeed());
+        output_->print("\n");
+    }
+    while (loopCount++ < repeatCount) {
+
+        if (arguments_->isShuffling())
+            registry_->shuffleTests(arguments_->getShuffleSeed());
+
+        output_->printTestRun(loopCount, repeatCount);
+        TestResult tr(*output_);
+        registry_->runAllTests(tr);
+        failedTestCount += tr.getFailureCount();
+        if (tr.isFailure()) {
+            failedExecutionCount++;
+        }
+    }
+    return (int) (failedTestCount != 0 ? failedTestCount : failedExecutionCount);
 }
 
 TestOutput* CommandLineTestRunner::createProdUTestOutput()
@@ -141,7 +168,7 @@ TestOutput* CommandLineTestRunner::createTeamCityOutput()
 TestOutput* CommandLineTestRunner::createJUnitOutput(const SimpleString& packageName)
 {
     JUnitTestOutput* junitOutput = new JUnitTestOutput;
-    if (junitOutput != NULL) {
+    if (junitOutput != NULLPTR) {
       junitOutput->setPackageName(packageName);
     }
     return junitOutput;
@@ -164,13 +191,13 @@ bool CommandLineTestRunner::parseArguments(TestPlugin* plugin)
 {
   if (!arguments_->parse(plugin)) {
     output_ = createConsoleOutput();
-    output_->print(arguments_->usage());
+    output_->print((arguments_->needHelp()) ? arguments_->help() : arguments_->usage());
     return false;
   }
 
   if (arguments_->isJUnitOutput()) {
     output_= createJUnitOutput(arguments_->getPackageName());
-    if (arguments_->isVerbose())
+    if (arguments_->isVerbose() || arguments_->isVeryVerbose())
       output_ = createCompositeOutput(output_, createConsoleOutput());
   } else if (arguments_->isTeamCityOutput()) {
     output_ = createTeamCityOutput();

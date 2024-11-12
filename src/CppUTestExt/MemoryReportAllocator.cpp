@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -29,7 +29,7 @@
 #include "CppUTestExt/MemoryReportAllocator.h"
 #include "CppUTestExt/MemoryReportFormatter.h"
 
-MemoryReportAllocator::MemoryReportAllocator() : result_(NULL), realAllocator_(NULL), formatter_(NULL)
+MemoryReportAllocator::MemoryReportAllocator() : result_(NULLPTR), realAllocator_(NULLPTR), formatter_(NULLPTR)
 {
 }
 
@@ -37,17 +37,17 @@ MemoryReportAllocator::~MemoryReportAllocator()
 {
 }
 
-const char* MemoryReportAllocator::name()
+const char* MemoryReportAllocator::name() const
 {
-    return realAllocator_->name();
+    return "MemoryReporterAllocator";
 }
 
-const char* MemoryReportAllocator::alloc_name()
+const char* MemoryReportAllocator::alloc_name() const
 {
     return realAllocator_->alloc_name();
 }
 
-const char* MemoryReportAllocator::free_name()
+const char* MemoryReportAllocator::free_name() const
 {
     return realAllocator_->free_name();
 }
@@ -62,6 +62,11 @@ TestMemoryAllocator* MemoryReportAllocator::getRealAllocator()
     return realAllocator_;
 }
 
+TestMemoryAllocator* MemoryReportAllocator::actualAllocator()
+{
+    return realAllocator_->actualAllocator();
+}
+
 void MemoryReportAllocator::setTestResult(TestResult* result)
 {
     result_ = result;
@@ -72,7 +77,7 @@ void MemoryReportAllocator::setFormatter(MemoryReportFormatter* formatter)
     formatter_ = formatter;
 }
 
-char* MemoryReportAllocator::alloc_memory(size_t size, const char* file, int line)
+char* MemoryReportAllocator::alloc_memory(size_t size, const char* file, size_t line)
 {
     char* memory = realAllocator_->alloc_memory(size, file, line);
     if (result_ && formatter_)
@@ -80,9 +85,9 @@ char* MemoryReportAllocator::alloc_memory(size_t size, const char* file, int lin
     return memory;
 }
 
-void MemoryReportAllocator::free_memory(char* memory, const char* file, int line)
+void MemoryReportAllocator::free_memory(char* memory, size_t size, const char* file, size_t line)
 {
-    realAllocator_->free_memory(memory, file, line);
+    realAllocator_->free_memory(memory, size, file, line);
     if (result_ && formatter_)
         formatter_->report_free_memory(result_, this, memory, file, line);
 }

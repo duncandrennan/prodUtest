@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -27,6 +27,7 @@
 
 #include "CppUTest/CommandLineTestRunner.h"
 #include "CppUTest/TestRegistry.h"
+#include "CppUTest/SimpleStringInternalCache.h"
 #include "CppUTestExt/MemoryReporterPlugin.h"
 #include "CppUTestExt/MockSupportPlugin.h"
 
@@ -34,28 +35,35 @@
 #include "CppUTestExt/GTestConvertor.h"
 #endif
 
-int main(int ac, const char** av)
+int main(int ac, const char *const *av)
 {
+    int result = 0;
+    GlobalSimpleStringCache simpleStringCache;
+
+    {
 #ifdef CPPUTEST_INCLUDE_GTEST_TESTS
-    GTestConvertor convertor;
-    convertor.addAllGTestToTestRegistry();
+        GTestConvertor convertor;
+        convertor.addAllGTestToTestRegistry();
 #endif
 
-    MemoryReporterPlugin plugin;
-    MockSupportPlugin mockPlugin;
-    TestRegistry::getCurrentRegistry()->installPlugin(&plugin);
-    TestRegistry::getCurrentRegistry()->installPlugin(&mockPlugin);
+        MemoryReporterPlugin plugin;
+        MockSupportPlugin mockPlugin;
+        TestRegistry::getCurrentRegistry()->installPlugin(&plugin);
+        TestRegistry::getCurrentRegistry()->installPlugin(&mockPlugin);
 
 #ifndef GMOCK_RENAME_MAIN
-    return CommandLineTestRunner::RunAllTests(ac, av);
+        result = CommandLineTestRunner::RunAllTests(ac, av);
 #else
-    /* Don't have any memory leak detector when running the Google Test tests */
+        /* Don't have any memory leak detector when running the Google Test tests */
 
-    testing::GMOCK_FLAG(verbose) = testing::internal::kWarningVerbosity;
+        testing::GMOCK_FLAG(verbose) = testing::internal::kWarningVerbosity;
 
-    ConsoleTestOutput output;
-    CommandLineTestRunner runner(ac, av, &output, TestRegistry::getCurrentRegistry());
-    return runner.runAllTestsMain();
+        ConsoleTestOutput output;
+        CommandLineTestRunner runner(ac, av, TestRegistry::getCurrentRegistry());
+        result = runner.runAllTestsMain();
 #endif
+    }
+
+    return result;
 }
 

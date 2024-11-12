@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -27,10 +27,10 @@
 
 #include "CppUTest/TestHarness.h"
 #include "CppUTest/TestRegistry.h"
+#include "CppUTest/PlatformSpecificFunctions.h"
 
 TestRegistry::TestRegistry() :
-    tests_(NULL), testDefines_(NULL), nameFilters_(NULL), groupFilters_(NULL), firstPlugin_(NullTestPlugin::instance()), runInSeperateProcess_(false), currentRepetition_(0), runIgnored_(false)
-
+    tests_(NULLPTR), testDefines_(NULLPTR), nameFilters_(NULLPTR), groupFilters_(NULLPTR), firstPlugin_(NullTestPlugin::instance()), runInSeperateProcess_(false), currentRepetition_(0), runIgnored_(false)
 {
 }
 
@@ -49,7 +49,7 @@ void TestRegistry::runAllTests(TestResult& result)
     bool skip_to_teardown = false;
 
     result.testsStarted();
-    for (UtestShell *test = tests_; test != NULL; test = test->getNext()) {
+    for (UtestShell *test = tests_; test != NULLPTR; test = test->getNext()) {
         if (runInSeperateProcess_) test->setRunInSeperateProcess();
         if (runIgnored_) test->setRunIgnored();
 
@@ -99,7 +99,7 @@ void TestRegistry::listTestGroupNames(TestResult& result)
 {
     SimpleString groupList;
 
-    for (UtestShell *test = tests_; test != NULL; test = test->getNext()) {
+    for (UtestShell *test = tests_; test != NULLPTR; test = test->getNext()) {
         SimpleString gname;
         gname += "#";
         gname += test->getGroup();
@@ -122,7 +122,7 @@ void TestRegistry::listTestGroupAndCaseNames(TestResult& result)
 {
     SimpleString groupAndNameList;
 
-    for (UtestShell *test = tests_; test != NULL; test = test->getNext()) {
+    for (UtestShell *test = tests_; test != NULLPTR; test = test->getNext()) {
         if (testShouldRun(test, result)) {
             SimpleString groupAndName;
             groupAndName += "#";
@@ -145,22 +145,42 @@ void TestRegistry::listTestGroupAndCaseNames(TestResult& result)
     result.print(groupAndNameList.asCharString());
 }
 
+void TestRegistry::listTestLocations(TestResult& result)
+{
+    SimpleString testLocations;
+
+    for (UtestShell *test = tests_; test != NULLPTR; test = test->getNext()) {
+            SimpleString testLocation;
+            testLocation += test->getGroup();
+            testLocation += ".";
+            testLocation += test->getName();
+            testLocation += ".";
+            testLocation += test->getFile();
+            testLocation += ".";
+            testLocation += StringFromFormat("%d\n",(int) test->getLineNumber());
+
+            testLocations += testLocation;
+    }
+
+    result.print(testLocations.asCharString());
+}
+
 bool TestRegistry::endOfGroup(UtestShell* test)
 {
     return (!test || !test->getNext() || test->getGroup() != test->getNext()->getGroup());
 }
 
-int TestRegistry::countTests()
+size_t TestRegistry::countTests()
 {
     return tests_ ? tests_->countTests() : 0;
 }
 
-TestRegistry* TestRegistry::currentRegistry_ = 0;
+TestRegistry* TestRegistry::currentRegistry_ = NULLPTR;
 
 TestRegistry* TestRegistry::getCurrentRegistry()
 {
     static TestRegistry registry;
-    return (currentRegistry_ == 0) ? &registry : currentRegistry_;
+    return (currentRegistry_ == NULLPTR) ? &registry : currentRegistry_;
 }
 
 void TestRegistry::setCurrentRegistry(TestRegistry* registry)
@@ -170,7 +190,7 @@ void TestRegistry::setCurrentRegistry(TestRegistry* registry)
 
 void TestRegistry::unDoLastAddTest()
 {
-    tests_ = tests_ ? tests_->getNext() : NULL;
+    tests_ = tests_ ? tests_->getNext() : NULLPTR;
 
 }
 
@@ -254,6 +274,20 @@ UtestShell* TestRegistry::getFirstTest()
     return tests_;
 }
 
+void TestRegistry::shuffleTests(size_t seed)
+{
+    UtestShellPointerArray array(getFirstTest());
+    array.shuffle(seed);
+    tests_ = array.getFirstTest();
+}
+
+void TestRegistry::reverseTests()
+{
+    UtestShellPointerArray array(getFirstTest());
+    array.reverse();
+    tests_ = array.getFirstTest();
+}
+
 UtestShell* TestRegistry::getTestWithNext(UtestShell* test)
 {
     UtestShell* current = tests_;
@@ -270,7 +304,7 @@ UtestShell* TestRegistry::findTestWithName(const SimpleString& name)
             return current;
         current = current->getNext();
     }
-    return NULL;
+    return NULLPTR;
 }
 
 UtestShell* TestRegistry::findTestWithGroup(const SimpleString& group)
@@ -281,6 +315,6 @@ UtestShell* TestRegistry::findTestWithGroup(const SimpleString& group)
             return current;
         current = current->getNext();
     }
-    return NULL;
+    return NULLPTR;
 }
 

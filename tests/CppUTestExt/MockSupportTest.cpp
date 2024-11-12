@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -37,10 +37,12 @@ TEST_GROUP(MockSupportTest)
   MockExpectedCallsListForTest expectations;
   MockFailureReporterInstaller failureReporterInstaller;
 
-  void teardown()
+  void teardown() CPPUTEST_OVERRIDE
   {
-    mock().checkExpectations();
-    CHECK_NO_MOCK_FAILURE();
+      mock().checkExpectations();
+      CHECK_NO_MOCK_FAILURE();
+      MockFailureReporterForTest::clearReporter();
+      mock().clear();
   }
 };
 
@@ -134,6 +136,14 @@ TEST(MockSupportTest, setDataObject)
     STRCMP_EQUAL("type", mock().getData("data").getType().asCharString());
 }
 
+TEST(MockSupportTest, setDataConstObject)
+{
+    void * ptr = (void*) 0x011;
+    mock().setDataConstObject("data", "type", ptr);
+    POINTERS_EQUAL(ptr, mock().getData("data").getConstObjectPointer());
+    STRCMP_EQUAL("type", mock().getData("data").getType().asCharString());
+}
+
 TEST(MockSupportTest, tracing)
 {
     mock().tracing(true);
@@ -162,6 +172,12 @@ TEST(MockSupportTest, tracingWorksHierarchically)
 TEST_GROUP(MockSupportTestWithFixture)
 {
     TestTestingFixture fixture;
+
+    void teardown() CPPUTEST_OVERRIDE
+    {
+        mock().clear();
+        MockFailureReporterForTest::clearReporter();
+    }
 };
 
 static void CHECK_EXPECTED_MOCK_FAILURE_LOCATION_failedTestMethod_()
@@ -215,6 +231,7 @@ static void unexpectedCallTestFunction_(void)
 
 TEST(MockSupportTestWithFixture, shouldCrashOnFailure)
 {
+    cpputestHasCrashed = false;
     mock().crashOnFailure(true);
     UtestShell::setCrashMethod(crashMethod);
     fixture.setTestFunction(unexpectedCallTestFunction_);
@@ -240,6 +257,21 @@ TEST(MockSupportTestWithFixture, ShouldNotCrashOnFailureAfterCrashMethodWasReset
     CHECK_FALSE(cpputestHasCrashed);
 }
 
+TEST(MockSupportTestWithFixture, shouldCrashOnFailureWithCppUTestSetting)
+{
+    cpputestHasCrashed = false;
+    UtestShell::setCrashOnFail();
+    UtestShell::setCrashMethod(crashMethod);
+    fixture.setTestFunction(unexpectedCallTestFunction_);
+
+    fixture.runAllTests();
+
+    CHECK(cpputestHasCrashed);
+
+    UtestShell::restoreDefaultTestTerminator();
+    UtestShell::resetCrashMethod();
+}
+
 TEST(MockSupportTestWithFixture, failedMockShouldFailAgainWhenRepeated)
 {
     fixture.setTestFunction(unexpectedCallTestFunction_);
@@ -249,9 +281,6 @@ TEST(MockSupportTestWithFixture, failedMockShouldFailAgainWhenRepeated)
         fixture.runAllTests();
         fixture.assertPrintContains("Unexpected call to function: unexpected");
         fixture.assertPrintContains("Errors (1 failures, 1 tests, 1 ran, 0 checks, 0 ignored, 0 filtered out");
-        fixture.output_->flush();
-        delete fixture.result_;
-        fixture.result_ = new TestResult(*fixture.output_);
+        fixture.flushOutputAndResetResult();
     }
 }
-

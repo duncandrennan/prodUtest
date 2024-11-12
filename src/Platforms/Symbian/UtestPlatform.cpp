@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -67,14 +67,14 @@ void PlatformSpecificRunTestInASeperateProcess(UtestShell* shell, TestPlugin* pl
    shell->runOneTest(plugin, *result);
 }
 
-static long TimeInMillisImplementation() {
+static unsigned long TimeInMillisImplementation() {
     struct timeval tv;
     struct timezone tz;
     ::gettimeofday(&tv, &tz);
-    return (tv.tv_sec * 1000) + (long)(tv.tv_usec * 0.001);
+    return ((unsigned long)tv.tv_sec * 1000) + ((unsigned long)tv.tv_usec / 1000);
 }
 
-long (*GetPlatformSpecificTimeInMillis)() = TimeInMillisImplementation;
+unsigned long (*GetPlatformSpecificTimeInMillis)() = TimeInMillisImplementation;
 
 TestOutput::WorkingEnvironment PlatformSpecificGetWorkingEnvironment()
 {
@@ -103,10 +103,6 @@ void PlatformSpecificFlush() {
     fflush(stdout);
 }
 
-int PlatformSpecificPutchar(int c) {
-    return putchar(c);
-}
-
 double PlatformSpecificFabs(double d) {
     return fabs(d);
 }
@@ -131,6 +127,8 @@ void* PlatformSpecificMemset(void* mem, int c, size_t size)
 {
     return memset(mem, c, size);
 }
+
+PlatformSpecificFile PlatformSpecificStdOut = stdout;
 
 PlatformSpecificFile PlatformSpecificFOpen(const char* filename, const char* flag) {
     return fopen(filename, flag);
@@ -186,4 +184,5 @@ PlatformSpecificMutex (*PlatformSpecificMutexCreate)(void) = DummyMutexCreate;
 void (*PlatformSpecificMutexLock)(PlatformSpecificMutex) = DummyMutexLock;
 void (*PlatformSpecificMutexUnlock)(PlatformSpecificMutex) = DummyMutexUnlock;
 void (*PlatformSpecificMutexDestroy)(PlatformSpecificMutex) = DummyMutexDestroy;
+void (*PlatformSpecificAbort)(void) = abort;
 

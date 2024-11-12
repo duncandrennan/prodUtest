@@ -25,6 +25,7 @@ static int productionCodeFooCalls()
 {
     int return_value;
     return_value = foo("value_string", 10);
+    (void)return_value;
     return_value = foo("value_string", 10);
     return return_value;
 }
@@ -38,10 +39,12 @@ static void productionCodeBarCalls()
 /* Actual test */
 TEST_GROUP(MockCheatSheet)
 {
-    void teardown()
+    void teardown() CPPUTEST_OVERRIDE
     {
         /* Check expectations. Alternatively use MockSupportPlugin */
         mock().checkExpectations();
+
+        mock().clear();
     }
 };
 
@@ -70,4 +73,3 @@ TEST(MockCheatSheet, bar)
     /* And the production code call */
     productionCodeBarCalls();
 }
-

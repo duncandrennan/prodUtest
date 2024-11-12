@@ -4,6 +4,8 @@
 #undef free
 #undef calloc
 #undef realloc
+#undef strdup
+#undef strndup
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -14,21 +16,21 @@
 #include <time.h>
 #include "CppUTest/PlatformSpecificFunctions.h"
 
-#include <windows.h>
+#include <Windows.h>
 #include <mmsystem.h>
 
 #include <setjmp.h>
 
 #ifdef STDC_WANT_SECURE_LIB
-    #define FOPEN(fp, filename, flag) fopen_s((fp), (filename), (flag))
-    #define _VSNPRINTF(str, size, trunc, format, args) _vsnprintf_s((str), (size), (trunc), (format), (args))
-    #define LOCALTIME(_tm, timer) localtime_s((_tm), (timer))
-    #define GMTIME(_tm, timer) gmtime_s((_tm), (timer))
+    #define MAYBE_SECURE_FOPEN(fp, filename, flag) fopen_s((fp), (filename), (flag))
+    #define MAYBE_SECURE_VSNPRINTF(str, size, trunc, format, args) _vsnprintf_s((str), (size), (trunc), (format), (args))
+    #define MAYBE_SECURE_LOCALTIME(_tm, timer) localtime_s((_tm), (timer))
+    #define MAYBE_SECURE_GMTIME(_tm, timer) gmtime_s((_tm), (timer))
 #else
-    #define FOPEN(fp, filename, flag) *(fp) = fopen((filename), (flag))
-    #define _VSNPRINTF(str, size, trunc, format, args) _vsnprintf((str), (size), (format), (args))
-    #define LOCALTIME(_tm, timer) memcpy(_tm, localtime(timer), sizeof(tm));
-    #define GMTIME(_tm, timer) memcpy(_tm, gmtime(timer), sizeof(tm));
+    #define MAYBE_SECURE_FOPEN(fp, filename, flag) *(fp) = fopen((filename), (flag))
+    #define MAYBE_SECURE_VSNPRINTF(str, size, trunc, format, args) _vsnprintf((str), (size), (format), (args))
+    #define MAYBE_SECURE_LOCALTIME(_tm, timer) memcpy(_tm, localtime(timer), sizeof(tm));
+    #define MAYBE_SECURE_GMTIME(_tm, timer) memcpy(_tm, gmtime(timer), sizeof(tm));
 #endif
 
 static jmp_buf test_exit_jmp_buf[10];
@@ -45,7 +47,7 @@ static int VisualCppSetJmp(void (*function) (void* data), void* data)
     return 0;
 }
 
-static void VisualCppLongJmp()
+CPPUTEST_NORETURN static void VisualCppLongJmp()
 {
     jmp_buf_index--;
     longjmp(test_exit_jmp_buf[jmp_buf_index], 1);
@@ -60,7 +62,7 @@ int (*PlatformSpecificSetJmp)(void (*function) (void*), void* data) = VisualCppS
 void (*PlatformSpecificLongJmp)(void) = VisualCppLongJmp;
 void (*PlatformSpecificRestoreJumpBuffer)(void) = VisualCppRestoreJumpBuffer;
 
-static void VisualCppRunTestInASeperateProcess(UtestShell* shell, TestPlugin* plugin, TestResult* result)
+static void VisualCppRunTestInASeperateProcess(UtestShell* shell, TestPlugin* /* plugin */, TestResult* result)
 {
     result->addFailure(TestFailure(shell, "-p doesn't work on this platform, as it is lacking fork.\b"));
 }
@@ -75,21 +77,40 @@ TestOutput::WorkingEnvironment PlatformSpecificGetWorkingEnvironment()
 
 ///////////// Time in millis
 
-static long VisualCppTimeInMillis()
+static unsigned long VisualCppTimeInMillis()
 {
-    return timeGetTime();
+	static LARGE_INTEGER s_frequency;
+	static const BOOL s_use_qpc = QueryPerformanceFrequency(&s_frequency);
+	if (s_use_qpc)
+	{
+		LARGE_INTEGER now;
+		QueryPerformanceCounter(&now);
+		return (unsigned long)((now.QuadPart * 1000) / s_frequency.QuadPart);
+	}
+	else
+	{
+	#ifdef TIMERR_NOERROR
+		return (unsigned long)timeGetTime();
+	#else
+		#if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_VISTA) || (_WIN32_WINNT < _WIN32_WINNT_VISTA)
+			return (unsigned long)GetTickCount();
+		#else
+			return (unsigned long)GetTickCount64();
+		#endif
+	#endif
+	}
 }
 
-long (*GetPlatformSpecificTimeInMillis)() = VisualCppTimeInMillis;
+unsigned long (*GetPlatformSpecificTimeInMillis)() = VisualCppTimeInMillis;
 
 ///////////// Time in String
 
 static const char* VisualCppTimeString()
 {
-    time_t the_time = time(NULL);
+    time_t the_time = time(NULLPTR);
     struct tm the_local_time;
     static char dateTime[80];
-    LOCALTIME(&the_local_time, &the_time);
+    MAYBE_SECURE_LOCALTIME(&the_local_time, &the_time);
     strftime(dateTime, 80, "%Y-%m-%dT%H:%M:%S", &the_local_time);
     return dateTime;
 }
@@ -101,7 +122,7 @@ static const char* VisualCppUTCTimeString()
     time_t the_time = time(NULL);
     struct tm the_gm_time;
     static char dateTime[80];
-    GMTIME(&the_gm_time, &the_time);
+    MAYBE_SECURE_GMTIME(&the_gm_time, &the_time);
     strftime(dateTime, 80, "%Y-%m-%dT%H:%M:%S", &the_gm_time);
     return dateTime;
 }
@@ -112,21 +133,21 @@ const char* (*GetPlatformSpecificUTCTimeString)() = VisualCppUTCTimeString;
 
 static int VisualCppVSNprintf(char *str, size_t size, const char* format, va_list args)
 {
-    char* buf = 0;
+    char* buf = NULLPTR;
     size_t sizeGuess = size;
 
-    int result = _VSNPRINTF( str, size, _TRUNCATE, format, args);
+    int result = MAYBE_SECURE_VSNPRINTF( str, size, _TRUNCATE, format, args);
     str[size-1] = 0;
     while (result == -1)
     {
-        if (buf != 0)
+        if (buf)
             free(buf);
         sizeGuess += 10;
         buf = (char*)malloc(sizeGuess);
-        result = _VSNPRINTF( buf, sizeGuess, _TRUNCATE, format, args);
+        result = MAYBE_SECURE_VSNPRINTF( buf, sizeGuess, _TRUNCATE, format, args);
     }
 
-    if (buf != 0)
+    if (buf)
         free(buf);
     return result;
 
@@ -137,7 +158,7 @@ int (*PlatformSpecificVSNprintf)(char *str, size_t size, const char* format, va_
 static PlatformSpecificFile VisualCppFOpen(const char* filename, const char* flag)
 {
     FILE* file;
-    FOPEN(&file, filename, flag);
+    MAYBE_SECURE_FOPEN(&file, filename, flag);
     return file;
 }
 
@@ -151,6 +172,7 @@ static void VisualCppFClose(PlatformSpecificFile file)
     fclose((FILE*)file);
 }
 
+PlatformSpecificFile PlatformSpecificStdOut = stdout;
 PlatformSpecificFile (*PlatformSpecificFOpen)(const char* filename, const char* flag) = VisualCppFOpen;
 void (*PlatformSpecificFPuts)(const char* str, PlatformSpecificFile file) = VisualCppFPuts;
 void (*PlatformSpecificFClose)(PlatformSpecificFile file) = VisualCppFClose;
@@ -160,7 +182,6 @@ static void VisualCppFlush()
     fflush(stdout);
 }
 
-int (*PlatformSpecificPutchar)(int c) = putchar;
 void (*PlatformSpecificFlush)(void) = VisualCppFlush;
 
 static void* VisualCppMalloc(size_t size)
@@ -178,6 +199,8 @@ static void VisualCppFree(void* memory)
     free(memory);
 }
 
+void (*PlatformSpecificSrand)(unsigned int) = srand;
+int (*PlatformSpecificRand)(void) = rand;
 void* (*PlatformSpecificMalloc)(size_t size) = VisualCppMalloc;
 void* (*PlatformSpecificRealloc)(void* memory, size_t size) = VisualCppReAlloc;
 void (*PlatformSpecificFree)(void* memory) = VisualCppFree;
@@ -222,3 +245,4 @@ PlatformSpecificMutex (*PlatformSpecificMutexCreate)(void) = VisualCppMutexCreat
 void (*PlatformSpecificMutexLock)(PlatformSpecificMutex) = VisualCppMutexLock;
 void (*PlatformSpecificMutexUnlock)(PlatformSpecificMutex) = VisualCppMutexUnlock;
 void (*PlatformSpecificMutexDestroy)(PlatformSpecificMutex) = VisualCppMutexDestroy;
+void (*PlatformSpecificAbort)(void) = abort;

@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -40,16 +40,18 @@ TEST_GROUP(MockPlugin)
 
     MockSupportPlugin plugin;
 
-    void setup()
+    void setup() CPPUTEST_OVERRIDE
     {
         test = new UtestShell("group", "name", "file", 1);
         result = new TestResult(output);
     }
 
-    void teardown()
+    void teardown() CPPUTEST_OVERRIDE
     {
         delete test;
         delete result;
+        mock().clear();
+        mock().removeAllComparatorsAndCopiers();
     }
 };
 
@@ -65,7 +67,7 @@ TEST(MockPlugin, checkExpectationsAndClearAtEnd)
 
     plugin.postTestAction(*test, *result);
 
-    STRCMP_CONTAINS(expectedFailure.getMessage().asCharString(), output.getOutput().asCharString())
+    STRCMP_CONTAINS(expectedFailure.getMessage().asCharString(), output.getOutput().asCharString());
     LONGS_EQUAL(0, mock().expectedCallsLeft());
     CHECK_NO_MOCK_FAILURE();
 }
@@ -83,18 +85,18 @@ TEST(MockPlugin, checkExpectationsWorksAlsoWithHierachicalObjects)
 
     plugin.postTestAction(*test, *result);
 
-    STRCMP_CONTAINS(expectedFailure.getMessage().asCharString(), output.getOutput().asCharString())
+    STRCMP_CONTAINS(expectedFailure.getMessage().asCharString(), output.getOutput().asCharString());
     CHECK_NO_MOCK_FAILURE();
 }
 
 class DummyComparator : public MockNamedValueComparator
 {
 public:
-    bool isEqual(const void* object1, const void* object2)
+    bool isEqual(const void* object1, const void* object2) CPPUTEST_OVERRIDE
     {
         return object1 == object2;
     }
-    SimpleString valueToString(const void*)
+    SimpleString valueToString(const void*) CPPUTEST_OVERRIDE
     {
         return "string";
     }
@@ -106,17 +108,19 @@ TEST(MockPlugin, installComparatorRecordsTheComparatorButNotInstallsItYet)
 
     DummyComparator comparator;
     plugin.installComparator("myType", comparator);
-    mock().expectOneCall("foo").withParameterOfType("myType", "name", NULL);
-    mock().actualCall("foo").withParameterOfType("myType", "name", NULL);
+    mock().expectOneCall("foo").withParameterOfType("myType", "name", NULLPTR);
+    mock().actualCall("foo").withParameterOfType("myType", "name", NULLPTR);
 
     MockNoWayToCompareCustomTypeFailure failure(test, "myType");
     CHECK_EXPECTED_MOCK_FAILURE(failure);
+
+    plugin.clear();
 }
 
 class DummyCopier : public MockNamedValueCopier
 {
 public:
-    void copy(void* dst, const void* src)
+    void copy(void* dst, const void* src) CPPUTEST_OVERRIDE
     {
         *(int*)dst = *(const int*)src;
     }
@@ -128,11 +132,13 @@ TEST(MockPlugin, installCopierRecordsTheCopierButNotInstallsItYet)
 
     DummyCopier copier;
     plugin.installCopier("myType", copier);
-    mock().expectOneCall("foo").withOutputParameterOfTypeReturning("myType", "name", NULL);
-    mock().actualCall("foo").withOutputParameterOfType("myType", "name", NULL);
+    mock().expectOneCall("foo").withOutputParameterOfTypeReturning("myType", "name", NULLPTR);
+    mock().actualCall("foo").withOutputParameterOfType("myType", "name", NULLPTR);
 
     MockNoWayToCopyCustomTypeFailure failure(test, "myType");
     CHECK_EXPECTED_MOCK_FAILURE(failure);
+
+    plugin.clear();
 }
 
 TEST(MockPlugin, preTestActionWillEnableMultipleComparatorsToTheGlobalMockSupportSpace)
@@ -150,9 +156,11 @@ TEST(MockPlugin, preTestActionWillEnableMultipleComparatorsToTheGlobalMockSuppor
 
     mock().checkExpectations();
     LONGS_EQUAL(0, result->getFailureCount());
+
+    plugin.clear();
 }
 
-static void _failTwiceFunction()
+static void failTwiceFunction_()
 {
     mock().expectOneCall("foobar");
     FAIL("This failed");
@@ -161,9 +169,8 @@ static void _failTwiceFunction()
 TEST(MockPlugin, shouldNotFailAgainWhenTestAlreadyFailed)
 {
     TestTestingFixture fixture;
-    fixture.registry_->installPlugin(&plugin);
-    fixture.setTestFunction(_failTwiceFunction);
+    fixture.installPlugin(&plugin);
+    fixture.setTestFunction(failTwiceFunction_);
     fixture.runAllTests();
     fixture.assertPrintContains("1 failures, 1 tests, 1 ran, 2 checks,");
 }
-

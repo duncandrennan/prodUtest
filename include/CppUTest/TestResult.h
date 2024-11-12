@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -60,64 +60,70 @@ public:
     virtual void countIgnored();
     virtual void addFailure(const TestFailure& failure);
     virtual void print(const char* text);
+    virtual void printVeryVerbose(const char* text);
 
     virtual void addExpected(const SimpleString& expected, const SimpleString& expected_max);
     virtual void addResult(const SimpleString& result);
     virtual void addInfo(const SimpleString& info);
 
-    int getTestCount() const
+    size_t getTestCount() const
     {
         return testCount_;
     }
-    int getRunCount() const
+    size_t getRunCount() const
     {
         return runCount_;
     }
-    int getCheckCount() const
+    size_t getCheckCount() const
     {
         return checkCount_;
     }
-    int getFilteredOutCount() const
+    size_t getFilteredOutCount() const
     {
         return filteredOutCount_;
     }
-    int getIgnoredCount() const
+    size_t getIgnoredCount() const
     {
         return ignoredCount_;
     }
-    int getFailureCount() const
+    size_t getFailureCount() const
     {
         return failureCount_;
     }
+
+    bool isFailure() const
+    {
+        return (getFailureCount() != 0) || (getRunCount() + getIgnoredCount() == 0);
+    }
+
+    size_t getTotalExecutionTime() const;
+    void setTotalExecutionTime(size_t exTime);
+
+    size_t getCurrentTestTotalExecutionTime() const;
+    size_t getCurrentGroupTotalExecutionTime() const;
+    bool getCurrentTestPassed() const;
 
     const char * getExpected() const;
     const char * getExpectedMax() const;
     const char * getResult() const;
     const char * getInfo() const;
 
-    long getTotalExecutionTime() const;
-    void setTotalExecutionTime(long exTime);
-
-    long getCurrentTestTotalExecutionTime() const;
-    long getCurrentGroupTotalExecutionTime() const;
-    bool getCurrentTestPassed() const;
-
 private:
 
     TestOutput& output_;
-    int testCount_;
-    int runCount_;
-    int checkCount_;
-    int failureCount_;
-    int filteredOutCount_;
-    int ignoredCount_;
-    long totalExecutionTime_;
-    long timeStarted_;
-    long currentTestTimeStarted_;
-    long currentTestTotalExecutionTime_;
+    size_t testCount_;
+    size_t runCount_;
+    size_t checkCount_;
+    size_t failureCount_;
+    size_t filteredOutCount_;
+    size_t ignoredCount_;
+    size_t totalExecutionTime_;
+    size_t timeStarted_;
+    size_t currentTestTimeStarted_;
+    size_t currentTestTotalExecutionTime_;
     bool currentTestPassed_;
-    long currentGroupTimeStarted_;
-    long currentGroupTotalExecutionTime_;
+    size_t currentGroupTimeStarted_;
+    size_t currentGroupTotalExecutionTime_;
     SimpleString result_;
     SimpleString expected_;
     SimpleString expected_max_;

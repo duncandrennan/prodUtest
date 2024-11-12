@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -30,18 +30,19 @@
 #include "MockPrinter.h"
 
 TEST_GROUP(Printer)
-{ Printer* printer;
-MockPrinter* mockPrinter;
+{
+    Printer* printer;
+    MockPrinter* mockPrinter;
 
-void setup()
-{
-    mockPrinter = new MockPrinter();
-    printer = mockPrinter;
-}
-void teardown()
-{
-    delete printer;
-}
+    void setup() CPPUTEST_OVERRIDE
+    {
+        mockPrinter = new MockPrinter();
+        printer = mockPrinter;
+    }
+    void teardown() CPPUTEST_OVERRIDE
+    {
+        delete printer;
+    }
 };
 
 TEST(Printer, PrintConstCharStar)
@@ -65,4 +66,3 @@ TEST(Printer, StreamOperators)
     const char* expected = "n=1234";
     CHECK_EQUAL(expected, mockPrinter->getOutput());
 }
-

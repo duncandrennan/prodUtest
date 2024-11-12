@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -30,6 +30,7 @@
 #include "CppUTest/TestRegistry.h"
 #include "CppUTest/TestTestingFixture.h"
 #include "CppUTestExt/OrderedTest.h"
+#include "OrderedTestTest.h"
 
 TEST_GROUP(TestOrderedTest)
 {
@@ -43,16 +44,16 @@ TEST_GROUP(TestOrderedTest)
     ExecFunctionTestShell normalTest3;
 
     OrderedTestShell* orderedTestCache;
-    void setup()
+    void setup() CPPUTEST_OVERRIDE
     {
         orderedTestCache = OrderedTestShell::getOrderedTestHead();
-        OrderedTestShell::setOrderedTestHead(0);
+        OrderedTestShell::setOrderedTestHead(NULLPTR);
 
         fixture = new TestTestingFixture();
-        fixture->registry_->unDoLastAddTest();
+        fixture->getRegistry()->unDoLastAddTest();
     }
 
-    void teardown()
+    void teardown() CPPUTEST_OVERRIDE
     {
         delete fixture;
         OrderedTestShell::setOrderedTestHead(orderedTestCache);
@@ -70,18 +71,18 @@ TEST_GROUP(TestOrderedTest)
 
     UtestShell* firstTest()
     {
-        return fixture->registry_->getFirstTest();
+        return fixture->getRegistry()->getFirstTest();
     }
 
     UtestShell* secondTest()
     {
-        return fixture->registry_->getFirstTest()->getNext();
+        return firstTest()->getNext();
     }
 };
 
 TEST(TestOrderedTest, TestInstallerSetsFields)
 {
-    OrderedTestInstaller(orderedTest, "testgroup", "testname", "this.cpp", 10, 5);
+    OrderedTestInstaller installer(orderedTest, "testgroup", "testname", "this.cpp", 10, 5);
     STRCMP_EQUAL("testgroup", orderedTest.getGroup().asCharString());
     STRCMP_EQUAL("testname", orderedTest.getName().asCharString());
     STRCMP_EQUAL("this.cpp", orderedTest.getFile().asCharString());
@@ -168,7 +169,7 @@ int OrderedTestTestingFixture::count_ = 0;
 
 TEST_GROUP(TestOrderedTestMacros)
 {
-    void setup()
+    void setup() CPPUTEST_OVERRIDE
     {
         OrderedTestTestingFixture::checkRun(TestRegistry::getCurrentRegistry()->getCurrentRepetition());
     }
@@ -198,3 +199,48 @@ TEST_ORDERED(TestOrderedTestMacros, Test3, 3)
 {
     CHECK(OrderedTestTestingFixture::count() == 3);
 }
+
+// Test with same level
+TEST_ORDERED(TestOrderedTestMacros, Test5_1, 5)
+{
+    CHECK(OrderedTestTestingFixture::count() == 5);
+}
+
+TEST_ORDERED(TestOrderedTestMacros, Test6_1, 6)
+{
+    CHECK(OrderedTestTestingFixture::count() == 7);
+}
+
+TEST_ORDERED(TestOrderedTestMacros, Test5_2, 5)
+{
+    CHECK(OrderedTestTestingFixture::count() == 6);
+}
+
+TEST_ORDERED(TestOrderedTestMacros, Test6_2, 6)
+{
+    CHECK(OrderedTestTestingFixture::count() == 8);
+}
+
+// Test C-Interface
+TEST_ORDERED(TestOrderedTestMacros, Test10, 10)
+{
+    CHECK(OrderedTestTestingFixture::count() == 12);
+}
+
+TEST_ORDERED(TestOrderedTestMacros, Test8, 8)
+{
+    CHECK(OrderedTestTestingFixture::count() == 10);
+}
+
+// Export to be usable in OrderedTestTest_c.c
+extern "C" {
+int orderedTestFixtureCWrapper(void) {
+    return OrderedTestTestingFixture::count();
+}
+}
+
+TEST_ORDERED_C_WRAPPER(TestOrderedTestMacros, Test11, 11)
+
+TEST_ORDERED_C_WRAPPER(TestOrderedTestMacros, Test7, 7)
+
+TEST_ORDERED_C_WRAPPER(TestOrderedTestMacros, Test9, 9)

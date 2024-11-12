@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".\include\Platforms\VisualCpp,.\include"
+				AdditionalIncludeDirectories=".\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;STDC_WANT_SECURE_LIB;CPPUTEST_USE_LONG_LONG"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -112,7 +112,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".\include\Platforms\VisualCpp,.\include"
+				AdditionalIncludeDirectories=".\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;STDC_WANT_SECURE_LIB;CPPUTEST_USE_LONG_LONG"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -162,6 +162,28 @@
 			>
 			<File
 				RelativePath="src\CppUTestExt\CodeMemoryReportFormatter.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="src\CppUTestExt\GTest.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -605,6 +627,28 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="SRC\CPPUTEST\SimpleStringInternalCache.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="SRC\CPPUTEST\TeamCityTestOutput.cpp"
 				>
 				<FileConfiguration
@@ -884,6 +928,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\CppUTestExt\GTestSupport.h"
+				>
+			</File>
+			<File
 				RelativePath="include\CppUTestExt\GTestConvertor.h"
 				>
 			</File>
@@ -981,6 +1029,10 @@
 			</File>
 			<File
 				RelativePath="include\CppUTest\SimpleString.h"
+				>
+			</File>
+			<File
+				RelativePath="include\CppUTest\SimpleStringInternalCache.h"
 				>
 			</File>
 			<File

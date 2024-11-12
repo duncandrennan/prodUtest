@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -32,13 +32,20 @@
 
 TEST_GROUP(MemoryReportAllocator)
 {
+    MemoryReportAllocator allocator;
 };
 
 TEST(MemoryReportAllocator, FunctionsAreForwardedForMallocAllocator)
 {
-    MemoryReportAllocator allocator;
     allocator.setRealAllocator(getCurrentMallocAllocator());
 
     STRCMP_EQUAL("malloc", allocator.alloc_name());
     STRCMP_EQUAL("free", allocator.free_name());
+}
+
+TEST(MemoryReportAllocator, keepingTrackOfActualAllocator)
+{
+    TestMemoryAllocator* originalAllocator = getCurrentMallocAllocator();
+    allocator.setRealAllocator(getCurrentMallocAllocator());
+    POINTERS_EQUAL(originalAllocator->actualAllocator(), allocator.actualAllocator());
 }

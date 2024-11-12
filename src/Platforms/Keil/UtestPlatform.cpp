@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -31,6 +31,8 @@
 #undef free
 #undef calloc
 #undef realloc
+#undef strdup
+#undef strndup
 
 #define  far  // eliminate "meaningless type qualifier" warning
 #include <time.h>
@@ -106,16 +108,16 @@ extern "C"
     *  In Keil MDK-ARM, clock() default implementation used semihosting.
     *  Resolutions is user adjustable (1 ms for now)
     */
-    static long TimeInMillisImplementation()
+    static unsigned long TimeInMillisImplementation()
     {
         clock_t t = clock();
 
-       t = t * 10;
+        t = t * 10;
 
-        return t;
+        return (unsigned long)t;
     }
 
-    long (*GetPlatformSpecificTimeInMillis)() = TimeInMillisImplementation;
+    unsigned long (*GetPlatformSpecificTimeInMillis)() = TimeInMillisImplementation;
 
     static const char* TimeStringImplementation()
     {
@@ -161,11 +163,11 @@ extern "C"
     {
     }
 
+    PlatformSpecificFile PlatformSpecificStdOut = stdout;
     PlatformSpecificFile (*PlatformSpecificFOpen)(const char*, const char*) = PlatformSpecificFOpenImplementation;
     void (*PlatformSpecificFPuts)(const char*, PlatformSpecificFile) = PlatformSpecificFPutsImplementation;
     void (*PlatformSpecificFClose)(PlatformSpecificFile) = PlatformSpecificFCloseImplementation;
 
-    int (*PlatformSpecificPutchar)(int) = putchar;
     void (*PlatformSpecificFlush)() = PlatformSpecificFlushImplementation;
     void* (*PlatformSpecificMalloc)(size_t) = malloc;
     void* (*PlatformSpecificRealloc) (void*, size_t) = realloc;
@@ -222,5 +224,6 @@ extern "C"
     void (*PlatformSpecificMutexLock)(PlatformSpecificMutex) = DummyMutexLock;
     void (*PlatformSpecificMutexUnlock)(PlatformSpecificMutex) = DummyMutexUnlock;
     void (*PlatformSpecificMutexDestroy)(PlatformSpecificMutex) = DummyMutexDestroy;
+    void (*PlatformSpecificAbort)(void) = abort;
 
 }

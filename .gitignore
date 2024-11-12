@@ -50,6 +50,10 @@ Release
 _build_
 _build
 builds/*gcc*
+cpputest_build/Makefile
+cpputest_build/generated
+cpputest_build/src
+cpputest_build/tests
 /.deps
 CppUTestExtTests
 CppUTestTests
@@ -83,6 +87,24 @@ cpputest_*.xml
 VC.DB*
 .dirstamp
 *.po
-generated/*
 .libs/*
 *.trs
+generated/
+*.deps/
+*.dirstamp
+*.trs
+
+#IAR automatically generated files
+*.dep
+*.ewt
+
+# Watcom
+*.LIB
+*.LST
+*.EXE
+*.LOG
+/console_output
+/exit
+
+# Builds
+/cpputest_build/

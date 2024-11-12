@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -39,12 +39,12 @@ public:
     {
     }
 
-    virtual void failTest(const MockFailure& failure) _override
+    virtual void failTest(const MockFailure& failure) CPPUTEST_OVERRIDE
     {
         result_.addFailure(failure);
     }
 
-    virtual UtestShell* getTestToFail() _override
+    virtual UtestShell* getTestToFail() CPPUTEST_OVERRIDE
     {
         return &test_;
     }
@@ -56,6 +56,11 @@ MockSupportPlugin::MockSupportPlugin(const SimpleString& name)
 }
 
 MockSupportPlugin::~MockSupportPlugin()
+{
+    clear();
+}
+
+void MockSupportPlugin::clear()
 {
     repository_.clear();
 }
@@ -72,7 +77,7 @@ void MockSupportPlugin::postTestAction(UtestShell& test, TestResult& result)
     if (!test.hasFailed())
         mock().checkExpectations();
     mock().clear();
-    mock().setMockFailureStandardReporter(NULL);
+    mock().setMockFailureStandardReporter(NULLPTR);
     mock().removeAllComparatorsAndCopiers();
 }
 

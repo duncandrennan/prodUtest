@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -54,7 +54,7 @@ class MockFailure : public TestFailure
 {
 public:
     MockFailure(UtestShell* test);
-    virtual ~MockFailure(){}
+    virtual ~MockFailure() CPPUTEST_DESTRUCTOR_OVERRIDE {}
 protected:
     void addExpectationsAndCallHistory(const MockExpectedCallsList& expectations);
     void addExpectationsAndCallHistoryRelatedTo(const SimpleString& function, const MockExpectedCallsList& expectations);
@@ -93,7 +93,8 @@ public:
 class MockExpectedParameterDidntHappenFailure : public MockFailure
 {
 public:
-    MockExpectedParameterDidntHappenFailure(UtestShell* test, const SimpleString& functionName, const MockExpectedCallsList& expectations);
+    MockExpectedParameterDidntHappenFailure(UtestShell* test, const SimpleString& functionName, const MockExpectedCallsList& allExpectations, 
+                                            const MockExpectedCallsList& matchingExpectations);
 };
 
 class MockNoWayToCompareCustomTypeFailure : public MockFailure

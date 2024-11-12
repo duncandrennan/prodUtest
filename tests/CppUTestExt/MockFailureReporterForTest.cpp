@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -32,10 +32,20 @@ void MockFailureReporterForTest::failTest(const MockFailure& failure)
     mockFailureString = failure.getMessage();
 }
 
+MockFailureReporterForTest* MockFailureReporterForTest::instance_ = NULLPTR;
+
 MockFailureReporterForTest* MockFailureReporterForTest::getReporter()
 {
-    static MockFailureReporterForTest reporter;
-    return &reporter;
+    if (instance_ == NULLPTR)
+        instance_ = new MockFailureReporterForTest;
+
+    return instance_;
+}
+
+void MockFailureReporterForTest::clearReporter()
+{
+    delete instance_;
+    instance_ = NULLPTR;
 }
 
 MockFailureReporterInstaller::MockFailureReporterInstaller()
@@ -45,7 +55,8 @@ MockFailureReporterInstaller::MockFailureReporterInstaller()
 
 MockFailureReporterInstaller::~MockFailureReporterInstaller()
 {
-  mock().setMockFailureStandardReporter(NULL);
+  mock().setMockFailureStandardReporter(NULLPTR);
+  MockFailureReporterForTest::clearReporter();
 }
 
 UtestShell* mockFailureTest()
@@ -63,7 +74,7 @@ void CLEAR_MOCK_FAILURE()
     MockFailureReporterForTest::getReporter()->mockFailureString = "";
 }
 
-void CHECK_EXPECTED_MOCK_FAILURE_LOCATION(const MockFailure& expectedFailure, const char* file, int line)
+void CHECK_EXPECTED_MOCK_FAILURE_LOCATION(const MockFailure& expectedFailure, const char* file, size_t line)
 {
     SimpleString expectedFailureString = expectedFailure.getMessage();
     SimpleString actualFailureString = mockFailureString();
@@ -79,7 +90,7 @@ void CHECK_EXPECTED_MOCK_FAILURE_LOCATION(const MockFailure& expectedFailure, co
     }
 }
 
-void CHECK_NO_MOCK_FAILURE_LOCATION(const char* file, int line)
+void CHECK_NO_MOCK_FAILURE_LOCATION(const char* file, size_t line)
 {
     if (mockFailureString() != "") {
         SimpleString error = "Unexpected mock failure:\n";
@@ -104,7 +115,15 @@ MockCheckedExpectedCall* MockExpectedCallsListForTest::addFunction(const SimpleS
   return newCall;
 }
 
-MockCheckedExpectedCall* MockExpectedCallsListForTest::addFunction(const SimpleString& name, int order)
+MockCheckedExpectedCall* MockExpectedCallsListForTest::addFunction(unsigned int numCalls, const SimpleString& name)
+{
+  MockCheckedExpectedCall* newCall = new MockCheckedExpectedCall(numCalls);
+  newCall->withName(name);
+  addExpectedCall(newCall);
+  return newCall;
+}
+
+MockCheckedExpectedCall* MockExpectedCallsListForTest::addFunctionOrdered(const SimpleString& name, unsigned int order)
 {
   MockCheckedExpectedCall* newCall = addFunction(name);
   newCall->withCallOrder(order);

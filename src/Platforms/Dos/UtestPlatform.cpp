@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -34,6 +34,8 @@
 #undef free
 #undef calloc
 #undef realloc
+#undef strdup
+#undef strndup
 
 #define  far  // eliminate "meaningless type qualifier" warning
 #include <time.h>
@@ -102,9 +104,9 @@ int (*PlatformSpecificSetJmp)(void (*function) (void*), void*) = DosSetJmp;
 void (*PlatformSpecificLongJmp)(void) = DosLongJmp;
 void (*PlatformSpecificRestoreJumpBuffer)(void) = DosRestoreJumpBuffer;
 
-static long DosTimeInMillis()
+static unsigned long DosTimeInMillis()
 {
-    return clock() * 1000 / CLOCKS_PER_SEC;
+    return (unsigned long)(clock() * 1000 / CLOCKS_PER_SEC);
 }
 
 static const char* DosTimeString()
@@ -123,7 +125,7 @@ static int DosVSNprintf(char* str, size_t size, const char* format, va_list args
     return vsnprintf(str, size, format, args);
 }
 
-long (*GetPlatformSpecificTimeInMillis)() = DosTimeInMillis;
+unsigned long (*GetPlatformSpecificTimeInMillis)() = DosTimeInMillis;
 const char* (*GetPlatformSpecificTimeString)() = DosTimeString;
 const char* (*GetPlatformSpecificUTCTimeString)() = DosUTCTimeString;
 int (*PlatformSpecificVSNprintf)(char *, size_t, const char*, va_list) = DosVSNprintf;
@@ -143,21 +145,16 @@ static void DosFClose(PlatformSpecificFile file)
    fclose((FILE*)file);
 }
 
+PlatformSpecificFile PlatformSpecificStdOut = stdout;
 PlatformSpecificFile (*PlatformSpecificFOpen)(const char* filename, const char* flag) = DosFOpen;
 void (*PlatformSpecificFPuts)(const char* str, PlatformSpecificFile file) = DosFPuts;
 void (*PlatformSpecificFClose)(PlatformSpecificFile file) = DosFClose;
-
-static int DosPutchar(int c)
-{
-    return putchar(c);
-}
 
 static void DosFlush()
 {
   fflush(stdout);
 }
 
-extern int (*PlatformSpecificPutchar)(int c) = DosPutchar;
 extern void (*PlatformSpecificFlush)(void) = DosFlush;
 
 static void* DosMalloc(size_t size)
@@ -191,6 +188,16 @@ void (*PlatformSpecificFree)(void* memory) = DosFree;
 void* (*PlatformSpecificMemCpy)(void* s1, const void* s2, size_t size) = DosMemCpy;
 void* (*PlatformSpecificMemset)(void* mem, int c, size_t size) = DosMemset;
 
+static void DosSrand(unsigned int seed)
+{
+    srand(seed);
+}
+
+static int DosRand()
+{
+    return rand();
+}
+
 static double DosFabs(double d)
 {
     return fabs(d);
@@ -206,6 +213,8 @@ static int DosIsInf(double d)
     return isinf(d);
 }
 
+void (*PlatformSpecificSrand)(unsigned int) = DosSrand;
+int (*PlatformSpecificRand)(void) = DosRand;
 double (*PlatformSpecificFabs)(double) = DosFabs;
 int (*PlatformSpecificIsNan)(double d) = DosIsNan;
 int (*PlatformSpecificIsInf)(double d) = DosIsInf;
@@ -231,5 +240,12 @@ PlatformSpecificMutex (*PlatformSpecificMutexCreate)(void) = DummyMutexCreate;
 void (*PlatformSpecificMutexLock)(PlatformSpecificMutex) = DummyMutexLock;
 void (*PlatformSpecificMutexUnlock)(PlatformSpecificMutex) = DummyMutexUnlock;
 void (*PlatformSpecificMutexDestroy)(PlatformSpecificMutex) = DummyMutexDestroy;
+
+static void DosAbort()
+{
+    abort();
+}
+
+void (*PlatformSpecificAbort)(void) = DosAbort;
 
 }

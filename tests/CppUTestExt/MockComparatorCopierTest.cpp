@@ -13,7 +13,7 @@
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ``AS IS'' AND ANY
+ * THIS SOFTWARE IS PROVIDED BY THE EARLIER MENTIONED AUTHORS ''AS IS'' AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
  * DISCLAIMED. IN NO EVENT SHALL <copyright holder> BE LIABLE FOR ANY
@@ -30,10 +30,12 @@
 
 TEST_GROUP(MockComparatorCopierTest)
 {
-  void teardown()
-  {
-    mock().checkExpectations();
-  }
+    void teardown() CPPUTEST_OVERRIDE
+    {
+        mock().checkExpectations();
+        mock().clear();
+        mock().removeAllComparatorsAndCopiers();
+    }
 };
 
 class MyTypeForTesting
@@ -53,13 +55,13 @@ public:
 class MyTypeForTestingComparator : public MockNamedValueComparator
 {
 public:
-    virtual bool isEqual(const void* object1, const void* object2)
+    virtual bool isEqual(const void* object1, const void* object2) CPPUTEST_OVERRIDE
     {
         const MyTypeForTesting* obj1 = (const MyTypeForTesting*) object1;
         const MyTypeForTesting* obj2 = (const MyTypeForTesting*) object2;
         return *(obj1->value) == *(obj2->value);
     }
-    virtual SimpleString valueToString(const void* object)
+    virtual SimpleString valueToString(const void* object) CPPUTEST_OVERRIDE
     {
         const MyTypeForTesting* obj = (const MyTypeForTesting*) object;
         return StringFrom(*(obj->value));
@@ -69,7 +71,7 @@ public:
 class MyTypeForTestingCopier : public MockNamedValueCopier
 {
 public:
-    virtual void copy(void* dst_, const void* src_)
+    virtual void copy(void* dst_, const void* src_) CPPUTEST_OVERRIDE
     {
         MyTypeForTesting* dst = (MyTypeForTesting*) dst_;
         const MyTypeForTesting* src = (const MyTypeForTesting*) src_;
@@ -117,12 +119,12 @@ TEST(MockComparatorCopierTest, customObjectParameterSucceeds)
 
 static bool myTypeIsEqual(const void* object1, const void* object2)
 {
-    return ((MyTypeForTesting*)object1)->value == ((MyTypeForTesting*)object2)->value;
+    return ((const MyTypeForTesting*)object1)->value == ((const MyTypeForTesting*)object2)->value;
 }
 
 static SimpleString myTypeValueToString(const void* object)
 {
-    return StringFrom(((MyTypeForTesting*)object)->value);
+    return StringFrom(((const MyTypeForTesting*)object)->value);
 }
 
 TEST(MockComparatorCopierTest, customObjectWithFunctionComparator)
@@ -205,7 +207,7 @@ TEST(MockComparatorCopierTest, unexpectedCustomTypeOutputParameter)
     MockExpectedCallsListForTest expectations;
     expectations.addFunction("foo");
     MockNamedValue parameter("parameterName");
-    parameter.setObjectPointer("MyTypeForTesting", &actualObject);
+    parameter.setConstObjectPointer("MyTypeForTesting", &actualObject);
     MockUnexpectedOutputParameterFailure expectedFailure(mockFailureTest(), "foo", parameter, expectations);
 
     mock().expectOneCall("foo");
@@ -227,7 +229,7 @@ TEST(MockComparatorCopierTest, customTypeOutputParameterMissing)
 
     MockExpectedCallsListForTest expectations;
     expectations.addFunction("foo")->withOutputParameterOfTypeReturning("MyTypeForTesting", "output", &expectedObject);
-    MockExpectedParameterDidntHappenFailure expectedFailure(mockFailureTest(), "foo", expectations);
+    MockExpectedParameterDidntHappenFailure expectedFailure(mockFailureTest(), "foo", expectations, expectations);
 
     mock().expectOneCall("foo").withOutputParameterOfTypeReturning("MyTypeForTesting", "output", &expectedObject);
     mock().actualCall("foo");
@@ -250,7 +252,7 @@ TEST(MockComparatorCopierTest, customTypeOutputParameterOfWrongType)
     MockExpectedCallsListForTest expectations;
     expectations.addFunction("foo")->withOutputParameterOfTypeReturning("MyTypeForTesting", "output", &expectedObject);
     MockNamedValue parameter("output");
-    parameter.setObjectPointer("OtherTypeForTesting", &actualObject);
+    parameter.setConstObjectPointer("OtherTypeForTesting", &actualObject);
     MockUnexpectedOutputParameterFailure expectedFailure(mockFailureTest(), "foo", parameter, expectations);
 
     mock().expectOneCall("foo").withOutputParameterOfTypeReturning("MyTypeForTesting", "output", &expectedObject);
@@ -565,11 +567,11 @@ TEST(MockComparatorCopierTest, installCopiersWorksHierarchically)
 class StubComparator : public MockNamedValueComparator
 {
 public:
-    virtual bool isEqual(const void*, const void*)
+    virtual bool isEqual(const void*, const void*) CPPUTEST_OVERRIDE
     {
         return true;
     }
-    virtual SimpleString valueToString(const void*)
+    virtual SimpleString valueToString(const void*) CPPUTEST_OVERRIDE
     {
         return "";
     }
@@ -596,4 +598,3 @@ TEST(MockComparatorCopierTest, shouldSupportConstParameters)
 
     mock().checkExpectations();
 }
-
