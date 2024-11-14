@@ -34,6 +34,10 @@ prodUtest is built on top of CppUTest, a C++ unit testing framework
 * You can debug with GDB
 * If you've compiled for 32-bit then install TDM32 and use the 32-bit GDB
 
+## Required packages
+
+`sudo apt install autotools-dev autoconf libtool`
+
 ## Getting Started
 
 You'll need to do the following to get started:
