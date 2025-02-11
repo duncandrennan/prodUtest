@@ -20,6 +20,12 @@ prodUtest is built on top of CppUTest, a C++ unit testing framework
 * `make`
 * `make check`
 
+## Building on Mac / Linux
+
+* `./autogen.sh`
+* `./configure`
+* `make -j8`
+
 ### Some things you could do differently
 
 * Install TDM32 instead (that may actually be simpler)
