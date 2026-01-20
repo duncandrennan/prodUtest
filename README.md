@@ -20,6 +20,15 @@ prodUtest is built on top of CppUTest, a C++ unit testing framework
 * `make`
 * `make check`
 
+## Building in Windows with MSYS2 using UCRT
+
+* `pacman -S base-devel mingw-w64-ucrt-x86_64-autotools mingw-w64-ucrt-x86_64-gcc git`
+* Open an MSYS2 UCRT terminal
+* Navigate to the source directory
+* `./autogen.sh`
+* `./configure`
+* `make -j16`
+
 ## Building on Mac / Linux
 
 * `./autogen.sh`
